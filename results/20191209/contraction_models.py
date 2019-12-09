@@ -175,7 +175,7 @@ print("next")
 # = ============================================================================
 # area heatmaps
 # =============================================================================
-res = 20
+res = 30
 
 f0 = savepath
 f1 = "heatmap_"
@@ -185,13 +185,13 @@ label2 = r"$\beta_p$"
 name2 = "beta_p"
 readout_type = 1
 arr2 = np.linspace(10,30,res)
-vmin = -5
-vmax = 5
+vmin = -2
+vmax = 2
 
 arrays = [np.linspace(0,30,res), 
          np.linspace(0,2,res), 
          np.linspace(0,1,res), 
-         np.linspace(0,20,res)]
+         np.linspace(5,15,res)]
 
 names = ["crit_timer", "beta_sad", "crit_il2", "crit_il7"]
 params =  [d_timer, d_il2, d_il2, d_il7]
@@ -202,26 +202,17 @@ for arr1, name1, param, label, savename in zip(arrays, names, params, labels, sa
     fig = model.get_heatmap(arr1, arr2, name1, name2, time, param, 
                             readout_type, vmin = vmin, vmax = vmax, 
                             label1 = label, label2 = label2)
-    fig.savefig(f1+f2+savename+".pdf")
+    fig.savefig(filename+savename+".pdf")
 
 # =============================================================================
 # peak heatmaps
 # =============================================================================
-res = 20
 
 f2 = "peak_"
 filename = f0+f1+f2
 label2 = r"$\beta_p$"
 name2 = "beta_p"
 readout_type = 0
-arr2 = np.linspace(10,30,res)
-vmin = -5
-vmax = 5
-
-arrays = [np.linspace(0,30,res), 
-         np.linspace(0,2,res), 
-         np.linspace(0,1,res), 
-         np.linspace(0,10,res)]
 
 names = ["crit_timer", "beta_sad", "crit_il2", "crit_il7"]
 params =  [d_timer, d_il2, d_il2, d_il7]
@@ -237,21 +228,12 @@ for arr1, name1, param, label, savename in zip(arrays, names, params, labels, sa
 # =============================================================================
 # tau heatmaps
 # =============================================================================
-res = 20
 
 f2 = "tau_"
 filename = f0+f1+f2
 label2 = r"$\beta_p$"
 name2 = "beta_p"
 readout_type = 4
-arr2 = np.linspace(10,30,res)
-vmin = -5
-vmax = 5
-
-arrays = [np.linspace(0,30,res), 
-         np.linspace(0,2,res), 
-         np.linspace(0,1,res), 
-         np.linspace(0,10,res)]
 
 names = ["crit_timer", "beta_sad", "crit_il2", "crit_il7"]
 params =  [d_timer, d_il2, d_il2, d_il7]
@@ -267,21 +249,12 @@ for arr1, name1, param, label, savename in zip(arrays, names, params, labels, sa
 # =============================================================================
 # half time heatmaps
 # =============================================================================
-res = 20
 
 f2 = "decay_"
 filename = f0+f1+f2
 label2 = r"$\beta_p$"
 name2 = "beta_p"
 readout_type = 5
-arr2 = np.linspace(10,30,res)
-vmin = -5
-vmax = 5
-
-arrays = [np.linspace(0,30,res), 
-         np.linspace(0,2,res), 
-         np.linspace(0,1,res), 
-         np.linspace(0,10,res)]
 
 names = ["crit_timer", "beta_sad", "crit_il2", "crit_il7"]
 params =  [d_timer, d_il2, d_il2, d_il7]

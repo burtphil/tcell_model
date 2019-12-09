@@ -56,15 +56,16 @@ def th_cell_diff(th_state, time, d):
         if d["crit"] == True:
             beta_p = beta_p*np.exp(-d["decay_p"]*(time-d["t0"]))
         else:
-            if d["mode"] == "timer" and time > d["crit_timer"]:
+            # define criteria upon which apoptosis is induced
+            c1 = d["mode"] == "timer" and time > d["crit_timer"]
+            c2 = d["mode"] == "il2" and conc_il2 < d["crit_il2"]
+            c3 = d["mode"] == "il7" and x_tot > d["crit_il7"]
+            c4 = d["mode"] == "timer+" and (c1 or c3)
+            c5 = d["mode"] == "il2+" and (c2 or c3)
+            crits = np.array([c1,c2,c3,c4,c5])
+            if crits.any():
                 d["t0"] = time
-                d["crit"] = True
-            if d["mode"] == "il2" and conc_il2 < d["crit_il2"]:
-                d["t0"] = time
-                d["crit"] = True
-            if d["mode"] == "il7" and x_tot > d["crit_il7"]:
-                d["t0"] = time
-                d["crit"] = True                
+                d["crit"] = True  
 
     for j in range(len(th_state)):
         #print(j)
@@ -296,53 +297,42 @@ def get_mu(d, name):
 
     return mu
 
-def vary_param(arr, name, ids, time, d, model = th_cell_diff):
+def update_dict(val, name, d):
     d = dict(d)
-    #print(arr)
-    reads_all_cells = []
-    
-    # get average transition times
     edge_names = ["SD", "SD_0", "SD_1", "SD_p", "chain"]
+
     if name in edge_names and name != "chain":
         mu = get_mu(d, name)
+    if name not in edge_names:
+        d[name] = val
+    elif name == "SD":
+        d["alpha"] = val
+        d["beta"] = val/mu
+    elif name == "SD_0":
+        d["alpha_0"] = val
+        d["beta_0"] = val/mu
+    elif name == "SD_1":
+        d["alpha_1"] = val
+        d["beta_1"] = val/mu
+    elif name == "SD_p":
+        d["alpha_p"] = val
+        d["beta_p"] = val/mu   
+    elif name == "chain":
+        # note that this only works for mu = 1 for both prolif and diff 
+        d["alpha_p"] = val
+        d["beta_p"] = val
+        d["alpha"] = val
+        d["beta"] = val   
         
-    for val in arr:
-        if name not in edge_names:
-            d[name] = val
+    return d
 
-        elif name == "SD":
-            d["alpha"] = val
-            d["beta"] = val/mu
+def vary_param(arr, name, ids, time, d, model = th_cell_diff):
 
-        elif name == "SD_0":
-            d["alpha_0"] = val
-            d["beta_0"] = val/mu
-
-        elif name == "SD_1":
-            d["alpha_1"] = val
-            d["beta_1"] = val/mu
-
-        elif name == "SD_p":
-            d["alpha_p"] = val
-            d["beta_p"] = val/mu
-        
-        elif name == "chain":
-            # note that this only works for mu = 1 for both prolif and diff 
-            d["alpha_p"] = val
-            d["beta_p"] = val
-            d["alpha"] = val
-            d["beta"] = val
-            
-        all_cells = get_cells2(time, d, model)
-        teff = all_cells[-1]
-        
-        readouts = get_readouts(teff, time)
-        readouts = get_readout_subset(readouts, ids)
-        reads_all_cells.append(readouts)    
-
-    return reads_all_cells
-
-    
+    dict_list = [update_dict(val, name, d) for val in arr]
+    readouts = [get_readouts2(time, dic) for dic in dict_list]
+    readouts = [get_readout_subset(readout, ids) for readout in readouts]
+    return readouts
+   
 def param_scan(param_names, dicts, titles, ids, time, filename, p_labels, ylim = [-2,2], 
                model = th_cell_diff):
     """
