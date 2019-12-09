@@ -208,6 +208,7 @@ def get_decay_halftime(cells, time):
     
     cellmax = np.amax(cells)
     cellmin = cells[-1]
+    # check if cells are maximum in size at the end of simulation
     crit1 = np.abs(cellmax-cellmin) > 1e-3
     crit2 = cellmax > cellmin
     
@@ -414,7 +415,7 @@ def param_scan(param_names, dicts, titles, ids, time, filename, p_labels, ylim =
                     c = colors[j])
                     ax[k].set_xticks([0,.5,1])
 
-                elif param_name in ["crit_timer", "crit_il7", "crit_il2", "beta_p", "rate_il2"]:
+                elif param_name in ["crit_timer", "crit_il7", "crit_il2", "rate_il2"]:
                     ax[k].plot(arr, reads[k,:,j], label = labels[j],
                     c = colors[j])
                     
@@ -439,8 +440,7 @@ def param_scan(param_names, dicts, titles, ids, time, filename, p_labels, ylim =
                     ax[k].axhline(y=0, c = "tab:grey", ls = "--", lw = 2)
                     ax[k].set_xticks(np.arange(0.1,1.1,0.1))
                     ax[k].set_xlim([0.07, 1.3])                                   
-    
-           
+         
     #axes[0][0].legend()   
     
     for i in range(len(titles)):
@@ -466,16 +466,16 @@ def generate_array(param_name, dic, edge_names):
         arr = np.linspace(pmin, pmax, 50)
     
     elif param_name == "beta_p":
-        arr = np.linspace(10,80,50)
+        arr = np.logspace(1,2,50)
         
     elif param_name == "crit_timer":
         arr = np.linspace(0, 10, 50)
 
     elif param_name == "crit_il7":
-        arr = np.linspace(1, 20, 50)
+        arr = np.linspace(0, 10, 50)
 
     elif param_name == "crit_il2":
-        arr = np.linspace(0, 5, 50)
+        arr = np.linspace(0, 1, 50)
 
     elif param_name == "rate_il2":
         arr = np.linspace(0, 5, 50)
@@ -506,7 +506,7 @@ def heatmap(arr1, arr2, name1, name2, time, params, readout_type, norm):
         d[name2] = a2
         readouts = get_readouts2(time, d)
         readout = readouts[readout_type]
-        #readout = np.log2(readout/norm)
+        readout = np.log2(readout/norm)
         z.append(readout)  
     
     #print(len(z))
@@ -517,14 +517,40 @@ def heatmap(arr1, arr2, name1, name2, time, params, readout_type, norm):
     
     return z
 
+def get_heatmap(arr1, arr2, name1, name2, time, params, readout_type, 
+                vmin = None, vmax = None, title = None, label1 = None, label2 = None):
+    
+    norm = get_readouts2(time, params)[readout_type]
+    z = heatmap(arr1, arr2, name1, name2, time, params, readout_type, norm)
+    
+    plot = plot_heatmap(arr1, arr2, name1, name2, z, vmin, vmax, title,
+                        label1, label2)
+    return plot
+
+def plot_heatmap(arr1, arr2, name1, name2, val, vmin = None, vmax = None, 
+                 title = None, label1 = None, label2 = None):
+    
+    fig, ax = plt.subplots(figsize = (6,4))
+    color = "bwr"
+    cmap = ax.pcolormesh(arr1, arr2, val, cmap = color, vmin = vmin, vmax = vmax)
+    
+    ax.set_xlabel(label1)
+    ax.set_ylabel(label2)
+    ax.set_title(title)
+    cbar = plt.colorbar(cmap)
+    cbar.set_label("lfc resp. size")
+        
+    plt.tight_layout()
+
+    return fig
+
 def sensitivity_analysis(arr, name, ids, time, dicts):
     """
     d: parameter dictionary
     param_names: list of names of parameters to be varied
     param_arrays: corresponding arrays that should be varied for each parameter
     """
-    
-        
+
     # get readouts for every model
     reads_null = vary_param(arr, name, ids, time, dicts[0])
     reads_il2 = vary_param(arr, name, ids, time, dicts[1])
@@ -588,8 +614,6 @@ def plot_timecourse(time, dicts, labels, filename = "timecourse"):
     
     fig, ax = plt.subplots()
     
-    #colors = ["k", "tab:green", "tab:orange"]
-    styles = ["-", "--"]
     for teff, label in zip(teffs, labels):
         ax.plot(time, teff, label = label)
     
@@ -598,5 +622,6 @@ def plot_timecourse(time, dicts, labels, filename = "timecourse"):
     ax.legend()
         
     plt.tight_layout()
-    #fig.savefig("../figures/"+filename+".pdf")
-    #fig.savefig("../figures/"+filename+".svg")
+  
+
+
