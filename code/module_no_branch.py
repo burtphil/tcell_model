@@ -452,8 +452,8 @@ def param_scan(param_names, dicts, titles, ids, time, filename, p_labels, ylim =
             ax.set_ylim(ylim)
              
     plt.tight_layout()
-    fig.savefig("../figures/pscans/"+filename+".pdf", bbox_inches = "tight")
-    fig.savefig("../figures/pscans/"+filename+".svg", bbox_inches = "tight")
+    fig.savefig(filename+".pdf", bbox_inches = "tight")
+    fig.savefig(filename+".svg", bbox_inches = "tight")
     plt.close()
     return fig
 
@@ -569,8 +569,8 @@ def plot_sensitivity_analysis(reads, labels, title):
     
     plt.xticks(rotation = "vertical")
     fig.tight_layout()
-    fig.savefig("../figures/sensitivity/"+"sensitivity_"+title+".pdf")
-    fig.savefig("../figures/sensitivity/"+"sensitivity_"+title+".svg")
+    #fig.savefig("../figures/sensitivity/"+"sensitivity_"+title+".pdf")
+    #fig.savefig("../figures/sensitivity/"+"sensitivity_"+title+".svg")
 
 
 def run_sensitivity(arr, name, ids, time, dicts, labels, title):
@@ -598,5 +598,5 @@ def plot_timecourse(time, dicts, labels, filename = "timecourse"):
     ax.legend()
         
     plt.tight_layout()
-    fig.savefig("../figures/"+filename+".pdf")
-    fig.savefig("../figures/"+filename+".svg")
+    #fig.savefig("../figures/"+filename+".pdf")
+    #fig.savefig("../figures/"+filename+".svg")

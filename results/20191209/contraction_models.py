@@ -5,13 +5,15 @@ Created on Tue Nov 12 12:52:14 2019
 
 @author: burt
 """
-
+import os
+os.chdir("/home/burt/Documents/projects/2019/tcell_model/code")
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set(context = "poster", style = "ticks", rc = {"lines.linewidth": 4})
 import module_no_branch as model 
 
+savepath = "/home/burt/Documents/projects/2019/tcell_model/results/20191209/"
 # =============================================================================
 # parameters
 # =============================================================================
@@ -89,7 +91,7 @@ ids = [0,1,4,5]
 param_names = ["fb_ifn", "beta"]
 titles = labels1
 p_labels = [r"fb strength $\beta_0$(IFN)", "beta"]
-filename = "feedback1"
+filename = savepath+"feedback1"
 #ylim = [-0.5,0.5]
 model.param_scan(param_names, dicts1, titles, ids, time, filename, p_labels, 
                  ylim = None)
@@ -100,28 +102,28 @@ ids = [0,1,4,5]
 titles = ["Null", "IL7", "IL2", "Timer"]
 param_names = ["SD", "SD_p"]
 p_labels = ["SD $\Psi$", "SD $\Psi_p$"]
-filename = "distributions"
+filename = savepath+"distributions"
 #ylim = [-3,3]
 model.param_scan(param_names, dicts, titles, ids, time, filename, p_labels, 
                  ylim = None)
 
 param_names = ["beta", "beta_p"]
 p_labels = [r"$\beta$", r"$\beta_p$"]
-filename = "proliferation"
+filename = savepath+"proliferation"
 ylim = [0,10]
 model.param_scan(param_names, dicts, titles, ids, time, filename, p_labels, 
                  ylim = ylim)
 
 param_names = ["beta", "d_eff"]
 p_labels = [r"$\beta$", "death rate"]
-filename = "rate_parameters"
+filename = savepath+"rate_parameters"
 #ylim = [-2,2]
 model.param_scan(param_names, dicts, titles, ids, time, filename, p_labels, 
                  ylim = None)
 
 param_names = ["fb_ifn", "beta"]
 p_labels = [r"fb strength $\beta_0$(IFN)", "beta"]
-filename = "feedback"
+filename = savepath+"feedback"
 #ylim = [-0.5,0.5]
 #model.param_scan(param_names, dicts, titles, ids, time, filename, p_labels, 
 #                 ylim)
@@ -167,7 +169,7 @@ dicts = [d_null, d_il7, d_il2, d_timer]
 
 param_names = ["crit_timer"]
 p_labels = ["timer t0"]
-filename = "crit_timer"
+filename = savepath+"crit_timer"
 titles = ["Timer"]
 dicts = [d_timer]
 ylim = [-3,3]
@@ -178,7 +180,7 @@ model.param_scan(param_names, dicts, titles, ids, time, filename, p_labels,
 
 param_names = ["crit_il7"]
 p_labels = ["carrying capacity"]
-filename = "crit_il7"
+filename = savepath+"crit_il7"
 titles = ["IL7 restriction"]
 dicts = [d_il7]
 ylim = [-3,3]
@@ -187,7 +189,7 @@ model.param_scan(param_names, dicts, titles, ids, time, filename, p_labels,
 
 param_names = ["rate_il2"]
 p_labels = ["IL2 secretion rate"]
-filename = "crit_il2"
+filename = savepath+"crit_il2"
 titles = ["IL2 restriction"]
 dicts = [d_il2]
 ylim = [-3,3]
