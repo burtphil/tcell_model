@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy import interpolate
 import itertools
+from matplotlib.ticker import ScalarFormatter, NullFormatter
 
 sns.set(context = "poster", style = "ticks", rc = {"lines.linewidth": 4})
 
@@ -52,16 +53,21 @@ def th_cell_diff(th_state, time, d):
     #if d["mode"] in ["il7", "il2", "timer"]:
     #    beta_p = beta_p*(1-(x_tot/d["crit_il7"]))
     
-    if d["mode"] in ["il7", "il2", "timer"]:
+    if d["mode"] in ["il7", "il2", "timer", "il2+", "timer+"]:
         if d["crit"] == True:
             beta_p = beta_p*np.exp(-d["decay_p"]*(time-d["t0"]))
         else:
             # define criteria upon which apoptosis is induced
-            c1 = d["mode"] == "timer" and time > d["crit_timer"]
-            c2 = d["mode"] == "il2" and conc_il2 < d["crit_il2"]
-            c3 = d["mode"] == "il7" and x_tot > d["crit_il7"]
-            c4 = d["mode"] == "timer+" and (c1 or c3)
-            c5 = d["mode"] == "il2+" and (c2 or c3)
+            crit_time = time > d["crit_timer"]
+            crit_il2 = conc_il2 < d["crit_il2"]
+            crit_il7 = x_tot > d["crit_il7"]
+            
+            c1 = d["mode"] == "timer" and crit_time
+            c2 = d["mode"] == "il2" and crit_il2
+            c3 = d["mode"] == "il7" and crit_il7
+            c4 = d["mode"] == "timer+" and (crit_time or crit_il7)
+            c5 = d["mode"] == "il2+" and (crit_il2 or crit_il7)
+ 
             crits = np.array([c1,c2,c3,c4,c5])
             if crits.any():
                 d["t0"] = time
@@ -415,11 +421,14 @@ def param_scan(param_names, dicts, titles, ids, time, filename, p_labels, ylim =
                     c = colors[j])
                           
                     x0 = np.amin(arr)*10
-                    xticks = [np.round(arr[0],2), np.round(x0,2), np.round(arr[-1],2)]
+                    xticks = np.array([np.round(arr[0],2), np.round(x0,2), np.round(arr[-1],2)])
                     ax[k].axvline(x=x0, c = "tab:grey", ls = "--", lw = 2)
                     ax[k].axhline(y=0, c = "tab:grey", ls = "--", lw = 2)
+                    ax[k].xaxis.set_major_formatter(ScalarFormatter())
+                    ax[k].xaxis.set_minor_formatter(NullFormatter())
+                    ax[k].set_xticks(xticks)
                     ax[k].set_xlim([xticks[0], xticks[2]])
-                    ax[k].set_xticks(xticks)                
+                                   
                       
                 else:
                     x = arr/arr**2
@@ -595,23 +604,25 @@ def run_sensitivity(arr, name, ids, time, dicts, labels, title):
     plot_sensitivity_analysis(readouts, labels, title)
     
 
-def plot_timecourse(time, dicts, labels, filename = "timecourse"):
+def plot_timecourse(time, dicts, labels):
     """
     plot time course for given number of models (provided by dicts)
     """
     all_cells = [get_cells2(time, dic) for dic in dicts]
     teffs = [cells[-1] for cells in all_cells]
     
+    colors = ["k", "tab:grey", "tab:cyan", "tab:purple"]
     fig, ax = plt.subplots()
     
-    for teff, label in zip(teffs, labels):
-        ax.plot(time, teff, label = label)
-    
+    for teff, label, c in zip(teffs, labels, colors):
+        ax.plot(time, teff, c = c, label = label)
+        
     ax.set_xlabel("time")
     ax.set_ylabel("cell dens. norm.")
-    ax.legend()
+    if labels != None:
+        ax.legend()
         
     plt.tight_layout()
-  
+
 
 
