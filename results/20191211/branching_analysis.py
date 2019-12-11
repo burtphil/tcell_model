@@ -45,12 +45,13 @@ d_comp2 = dict(d_comp1)
 d_prec2 = dict(d_prec1)
 
 d_comp2["beta1"] = 5.
-d_prec2["p1_def"] = 0.33
+d_prec2["beta1"] = 5.
+d_prec2["beta2"] = 7.
 
-cells_prec1 = m_branch.run_model(d_prec1, t, m_branch.branch_precursor)
-cells_comp1 = m_branch.run_model(d_comp1, t, m_branch.branch_competetive)
-cells_prec2 = m_branch.run_model(d_prec2, t, m_branch.branch_precursor)
-cells_comp2 = m_branch.run_model(d_comp2, t, m_branch.branch_competetive)
+cells_prec1 = m_branch.run_model(d_prec1, t, fun = m_branch.branch_precursor)
+cells_comp1 = m_branch.run_model(d_comp1, t, fun = m_branch.branch_competetive)
+cells_prec2 = m_branch.run_model(d_prec2, t, fun = m_branch.branch_precursor)
+cells_comp2 = m_branch.run_model(d_comp2, t, fun = m_branch.branch_competetive)
 
 fig, ax = plt.subplots(1,2, figsize = (10,4.5))
 
@@ -71,4 +72,82 @@ for a in ax:
 ax[0].set_title("precursor model")
 ax[1].set_title("competition model")
 plt.tight_layout()
-fig.savefig(savepath+"timecourse.svg")
+#fig.savefig(savepath+"timecourse.svg")
+plt.close()
+
+d_fb = dict(d_prec1)
+x = 1
+d_fb["alpha1"] = x
+d_fb["beta1"] = float(x)
+d_fb["alpha2"] = x
+d_fb["beta2"] = float(x)
+d_fb["fb_prob1"] = 1000
+cells_fb = m_branch.run_model(d_fb,t)
+cells_fb = np.swapaxes(cells_fb, 0,1)
+fig,ax = plt.subplots()
+ax.plot(t, cells_fb)
+
+# =============================================================================
+# analyze feedback in precursor model for fb on prob fb on rate and both for all
+# readouts and for diff chain lenghts
+# =============================================================================
+
+# make arr with dicts of diff chain length
+alpha_arr = np.arange(1,10,1, dtype = int)
+name = "SD"
+dic_list_alpha = [m_branch.update_dict(val,name,d_prec1) for val in alpha_arr]
+
+# vary fb strength and target either rate or branching prob
+arr = np.linspace(0,1000,100)
+name = "fb_rate1"
+reads = [m_branch.vary_param(arr, name, t, dic) for dic in dic_list_alpha]
+reads_norm = [m_branch.run_model(dic, t, output = "readouts") for dic in dic_list_alpha]
+reads = [np.log2(read/read_norm) for read, read_norm in zip(reads, reads_norm)]
+reads = np.asarray(reads)
+reads = np.swapaxes(reads,0,1)
+#reads has shape (alphas, fb_arr, readouts)
+
+name2 = "fb_prob1"
+reads2 = [m_branch.vary_param(arr, name2, t, dic) for dic in dic_list_alpha]
+reads2 = [np.log2(read/read_norm) for read, read_norm in zip(reads2, reads_norm)]
+reads2 = np.asarray(reads2)
+reads2 = np.swapaxes(reads2,0,1)
+#reads has shape (alphas, fb_arr, readouts)
+
+# plot settings
+ylim = [-0.6,0.8]
+titles = ["rel. area", "rel. peak size", "rel. tau"]
+xlabel1 = "fb --> rate"
+xlabel2 = "fb --> prob"
+ylabel = "log2FC"
+figsize = (14,4)
+xticks = np.array([0,500,1000])
+
+# reads fb on rate plot
+fig, ax = plt.subplots(1,3, figsize = figsize)
+for i in range(3):
+    ax[i].plot(arr, reads[:,:,i])
+    ax[i].set_ylim(ylim)
+    ax[i].set_xlabel(xlabel1)
+    ax[i].set_ylabel(ylabel)
+    ax[i].set_title(titles[i])
+    ax[i].set_xticks(xticks)
+plt.tight_layout()
+
+
+fig.savefig(savepath+"fb_rate.pdf")
+fig.savefig(savepath+"fb_rate.svg")
+
+# make same thing for reads2
+fig, ax = plt.subplots(1,3, figsize = figsize)
+for i in range(3):
+    ax[i].plot(arr, reads2[:,:,i])
+    ax[i].set_ylim(ylim)
+    ax[i].set_xlabel(xlabel2)
+    ax[i].set_ylabel(ylabel)
+    ax[i].set_title(titles[i])
+    ax[i].set_xticks(xticks)
+    
+plt.tight_layout()
+fig.savefig(savepath+"fb_prob.pdf")
+fig.savefig(savepath+"fb_prob.svg")

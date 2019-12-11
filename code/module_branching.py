@@ -87,8 +87,8 @@ def branch_competetive(state, time, d):
     cyto_1 = d["beta_cyto_1"]*th1_all + d["ifn_ext"]
     cyto_2 = d["beta_cyto_2"]*th2_all + d["il21_ext"]
     ### calculate cytokine effect on rate
-    fb1 = d["fb_1"]*cyto_1**3/(cyto_1**3+d["K_1"]**3)
-    fb2 = d["fb_2"]*cyto_2**3/(cyto_2**3+d["K_2"]**3)
+    fb1 = d["fb_rate1"]*cyto_1**3/(cyto_1**3+d["K_1"]**3)
+    fb2 = d["fb_rate2"]*cyto_2**3/(cyto_2**3+d["K_2"]**3)
     ### update differantiation rate
     beta1 = d["beta1"]*(1+fb1)
     beta2 = d["beta2"]*(1+fb2)
@@ -128,9 +128,10 @@ def branch_precursor(state, time, d):
     cyto_2 = d["beta_cyto_2"]*th2_all + d["il21_ext"]
     
     ### calculate probability 
-    p1 = d["fb_1"]*cyto_1**3/(cyto_1**3+d["K_1"]**3)
-    p2 = d["fb_2"]*cyto_2**3/(cyto_2**3+d["K_2"]**3)
+    p1 = d["fb_prob1"]*cyto_1**3/(cyto_1**3+d["K_1"]**3)
+    p2 = d["fb_prob2"]*cyto_2**3/(cyto_2**3+d["K_2"]**3)
     # account for default probability and feedback strength
+
     p1 = (p1+1)*d["p1_def"]
     p2 = (p2+1)*(1-d["p1_def"])
 
@@ -138,20 +139,27 @@ def branch_precursor(state, time, d):
     p1_norm = p1/(p1+p2)
     #p2_norm = 1-p1_norm
     p2_adj = 1.
-    
+
+    ### calculate fb rate effects
+    fb1 = d["fb_rate1"]*cyto_1**3/(cyto_1**3+d["K_1"]**3)
+    fb2 = d["fb_rate2"]*cyto_2**3/(cyto_2**3+d["K_2"]**3)
+    ### update differantiation rate
+    beta1 = d["beta1"]*(1+fb1)
+    beta2 = d["beta2"]*(1+fb2)
+      
     # adjust this parameter to effectively change branching prob because beta1 and beta2 also
-    # play a role
-    p1_adj = p1_norm*d["beta2"]/(d["beta1"]*(1-p1_norm))
-    print(p1_adj*d["beta1"]/(p1_adj*d["beta1"]+d["beta2"]))
-    dt_th1 = diff_precursor(th1, th0, d["alpha1"], d["beta1"], d["beta1_p"], p1_adj, d)
-    dt_th2 = diff_precursor(th2, th0, d["alpha2"], d["beta2"], d["beta2_p"], p2_adj, d)
+    # play a role, note that fb can affect beta1,2
+    p1_adj = p1_norm*beta2/(beta1*(1-p1_norm))
+
+    dt_th1 = diff_precursor(th1, th0, d["alpha1"], beta1, d["beta1_p"], p1_adj, d)
+    dt_th2 = diff_precursor(th2, th0, d["alpha2"], beta2, d["beta2_p"], p2_adj, d)
 
     dt_th0 = -(d["beta1"]*p1_adj+d["beta2"])*th0    
     dt_state = np.concatenate(([dt_th0], dt_th1, dt_th2))
 
     return dt_state
 
-def run_model(d, t, fun, output = "cells"):
+def run_model(d, t, fun = branch_precursor, output = "cells"):
     if fun == branch_competetive:
         
         y= np.zeros(d["alpha1"]+d["alpha1_p"]+d["alpha2"]+d["alpha2_p"]-1)
@@ -170,6 +178,7 @@ def run_model(d, t, fun, output = "cells"):
         return cells
     
     elif output == "readouts":
+
         cells = get_cells(state, d, fun)
         readouts = get_readouts(cells, t)
         return readouts
@@ -230,7 +239,7 @@ def get_readouts(cells, time):
     rel_tau = th1_tau/th2_tau if th2_tau != 0 else np.nan
     
     readouts = [rel_area, rel_peak, rel_tau, area, th1_peak, th2_peak]
-    
+    readouts = np.asarray(readouts)
     return readouts
 
 def get_peaktime(cells, time):
@@ -267,12 +276,16 @@ def update_dict(val, name, d):
     d = dict(d)
     if name not in edge_names:
         d[name] = val
-    
+    if name == "SD":
+        d["alpha1"] = val
+        d["alpha2"] = val
+        d["beta1"] = float(val)
+        d["beta2"] = float(val)
     return d
 
-def vary_param(arr, name, time, d, fun):
+def vary_param(arr, name, time, d, fun = branch_precursor):
 
     dict_list = [update_dict(val, name, d) for val in arr]
     readouts = [run_model(dic, time, fun, output = "readouts") for dic in dict_list]
-
+    readouts = np.asarray(readouts)
     return readouts

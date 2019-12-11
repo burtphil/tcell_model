@@ -18,12 +18,14 @@ d_comp = {
           "alpha2_p" : 10,
           "beta1_p" : 10.,
           "beta2_p" : 10.,  
-          "fb_1" : 0,
-          "fb_2" : 0,
+          "fb_rate1" : 0,
+          "fb_rate2" : 0,
+          "fb_prob1" : 0,
+          "fb_prob2" : 0,
           "K_1" : 1.,
           "K_2" : 1.,
-          "beta_cyto_1": 0,
-          "beta_cyto_2": 0,
+          "beta_cyto_1": 1.,
+          "beta_cyto_2": 1.,
           "d_eff" : 1.0,
           "d_prec" : 0,
           "ifn_ext" : 0,
@@ -33,7 +35,6 @@ d_comp = {
 
 # calculate corresponding beta values for precursor model
 d_prec = dict(d_comp)
-d_prec["beta0"] = d_prec["beta1"]+d_prec["beta2"]
 d_prec["p1_def"] = 0.5
 
 # =============================================================================
