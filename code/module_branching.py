@@ -44,7 +44,7 @@ def diff_effector(state, th0, alpha, beta, beta_p, p, d):
                
     return dt_state
 
-def diff_precursor(state, th0, alpha, beta, beta_p, p_norm, d):
+def diff_precursor(state, th0, alpha, beta, beta_p, p_adj, d):
     """
     takes state vector to differentiate effector cells as linear chain
     needs alpha and beta(r) of response time distribution, probability
@@ -54,7 +54,7 @@ def diff_precursor(state, th0, alpha, beta, beta_p, p_norm, d):
 
     for j in range(len(state)):
         if j == 0:
-            dt_state[j] = p_norm*d["beta0"]*th0 - (beta+d["d_prec"])*state[j]             
+            dt_state[j] = p_adj*beta*th0 - (beta+d["d_prec"])*state[j]             
         elif j < alpha:
             dt_state[j] = beta*state[j-1]- (beta+d["d_prec"])*state[j]                
         elif j == alpha:
@@ -117,9 +117,6 @@ def branch_precursor(state, time, d):
 
     th0 = state[0]
     
-    dt_th0 = -d["beta0"]*th0
-    
-    
     th1 = state[1:(d["alpha1"]+d["alpha1_p"]+1)]
     th2 = state[(d["alpha1"]+d["alpha1_p"]+1):]
     #print(len(state), len(th1))
@@ -137,19 +134,19 @@ def branch_precursor(state, time, d):
     p1 = (p1+1)*d["p1_def"]
     p2 = (p2+1)*(1-d["p1_def"])
 
-    ### update differentiation rate
+    ### this is the effective probability after feedback integration 
     p1_norm = p1/(p1+p2)
-    p2_norm = 1-p1_norm
-
-    alpha1 = d["alpha1"]
-    beta1 = d["beta1"]
-    dt_th1 = diff_precursor(th1, th0, alpha1, beta1, d["beta1_p"], p1_norm, d)
-
-    alpha2 = d["alpha2"]
-    beta2 = d["beta2"]
-
-    dt_th2 = diff_precursor(th2, th0, alpha2, beta2, d["beta2_p"], p2_norm, d)
+    #p2_norm = 1-p1_norm
+    p2_adj = 1.
     
+    # adjust this parameter to effectively change branching prob because beta1 and beta2 also
+    # play a role
+    p1_adj = p1_norm*d["beta2"]/(d["beta1"]*(1-p1_norm))
+    print(p1_adj*d["beta1"]/(p1_adj*d["beta1"]+d["beta2"]))
+    dt_th1 = diff_precursor(th1, th0, d["alpha1"], d["beta1"], d["beta1_p"], p1_adj, d)
+    dt_th2 = diff_precursor(th2, th0, d["alpha2"], d["beta2"], d["beta2_p"], p2_adj, d)
+
+    dt_th0 = -(d["beta1"]*p1_adj+d["beta2"])*th0    
     dt_state = np.concatenate(([dt_th0], dt_th1, dt_th2))
 
     return dt_state
