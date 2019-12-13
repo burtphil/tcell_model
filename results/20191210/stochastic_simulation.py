@@ -48,16 +48,21 @@ def run_sim(time, cells):
         n_alive = get_alive_cells()
         exp_arr = exp_cdf(t, n_alive)
         
-        # get random numbers from alive cells to compare with exp array    
+        # get random numbers from alive cells to check if div time is reached  
         prob_div = alive_cells[:, 1]
         update_arr = exp_arr > prob_div
         
         #update arr contains information which cells divide
         # get number of cell divisions
         n_new_cells = np.sum(update_arr)
+        
         # for divided cells, assign new division times
         
+        # remember last division time
+        
         # create number of new cells from dead cells
+        # for these cells also add next division time and birth time
+        
         counter[i] = count_cells()
     return counter    
 time = np.arange(0,10,0.1)

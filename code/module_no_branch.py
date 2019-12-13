@@ -513,25 +513,25 @@ def heatmap(arr1, arr2, name1, name2, time, params, readout_type, norm):
     z = z.reshape(len(arr1), len(arr2))
     z = z[:-1, :-1]    
     z = z.T
+    heatmap_arr = [arr1, arr2, z]
     
-    return z
+    return heatmap_arr
 
-def get_heatmap(arr1, arr2, name1, name2, time, params, readout_type, 
-                vmin = None, vmax = None, title = None, label1 = None, label2 = None):
+def get_heatmap(arr1, arr2, name1, name2, time, params, readout_type):
     
     norm = get_readouts2(time, params)[readout_type]
-    z = heatmap(arr1, arr2, name1, name2, time, params, readout_type, norm)
-    
-    plot = plot_heatmap(arr1, arr2, name1, name2, z, vmin, vmax, title,
-                        label1, label2)
-    return plot
+    heatmap_arr = heatmap(arr1, arr2, name1, name2, time, params, readout_type, norm)
 
-def plot_heatmap(arr1, arr2, name1, name2, val, vmin = None, vmax = None, 
-                 title = None, label1 = None, label2 = None):
-    
+    return heatmap_arr
+
+def plot_heatmap(heatmap_arr, vmin = None, vmax = None, title = None, 
+                 label1 = None, label2 = None):
+
+    arr1, arr2, val = heatmap_arr
     fig, ax = plt.subplots(figsize = (6,4))
-    color = "bwr"
-    cmap = ax.pcolormesh(arr1, arr2, val, cmap = color, vmin = vmin, vmax = vmax)
+    color = "Blues"
+    cmap = ax.pcolormesh(arr1, arr2, val, cmap = color, vmin = vmin, vmax = vmax,
+                         rasterized = True)
     
     ax.set_xlabel(label1)
     ax.set_ylabel(label2)

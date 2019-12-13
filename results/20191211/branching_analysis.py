@@ -29,8 +29,7 @@ def update_dict(d, update_type = "RTM"):
     return d
 
 #======================================================================
-# normal time course
-# plot this as relative th1 tfh fraction?
+# normal time course to compare prec and comp model
 # =============================================================================
 t = np.arange(0,10,0.01)
 
@@ -86,6 +85,39 @@ cells_fb = m_branch.run_model(d_fb,t)
 cells_fb = np.swapaxes(cells_fb, 0,1)
 fig,ax = plt.subplots()
 ax.plot(t, cells_fb)
+
+# =============================================================================
+# time course to show feedback effect on prob and fb effect on rate
+# =============================================================================
+# init sim conditions
+val_fb = 1000
+
+name_prob = "fb_prob1"
+name_rate = "fb_rate1"
+
+d_fb_prob1 = m_branch.update_dict(val_fb, name_prob, d_prec1)
+d_fb_rate1 = m_branch.update_dict(val_fb, name_rate, d_prec1)
+
+# same dicts with single step process
+name = "SD"
+val = 1
+d_fb_prob2 = m_branch.update_dict(val, name, d_fb_prob1)
+d_fb_rate2 = m_branch.update_dict(val, name, d_fb_rate1)
+
+dicts = [d_fb_prob1, d_fb_prob2, d_fb_rate1, d_fb_rate2]
+cells = [m_branch.run_model(dic, t) for dic in dicts]
+
+fig, ax = plt.subplots(1,2, figsize = (10,4))
+# time course fb on prob (single step vs multistep)
+ax[0].plot(t, cells[0][0], c = "tab:blue")
+ax[0].plot(t, cells[0][1], c = "tab:red")
+ax[0].plot(t, cells[1][0], c = "tab:blue", ls = "--")
+ax[0].plot(t, cells[1][1], c = "tab:red", ls = "--")
+# time course fb on rate (single step vs multistep)
+ax[1].plot(t, cells[2][0], c = "tab:blue")
+ax[1].plot(t, cells[2][1], c = "tab:red")
+ax[1].plot(t, cells[3][0], c = "tab:blue", ls = "--")
+ax[1].plot(t, cells[3][1], c = "tab:red", ls = "--")
 
 # =============================================================================
 # analyze feedback in precursor model for fb on prob fb on rate and both for all
