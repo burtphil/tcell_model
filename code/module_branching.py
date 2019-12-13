@@ -54,9 +54,9 @@ def diff_precursor(state, th0, alpha, beta, beta_p, p_adj, d):
 
     for j in range(len(state)):
         if j == 0:
-            dt_state[j] = p_adj*beta*th0 - (beta+d["d_prec"])*state[j]             
+            dt_state[j] = p_adj*beta*th0 - beta*state[j]             
         elif j < alpha:
-            dt_state[j] = beta*state[j-1]- (beta+d["d_prec"])*state[j]                
+            dt_state[j] = beta*state[j-1]- beta*state[j]                
         elif j == alpha:
             # the problem with the 4 and 2 is that since differentiation takes 1 day it should divide twice giving 4 cells
             # however, if it has arrived in the final states if should double every half day
@@ -150,11 +150,11 @@ def branch_precursor(state, time, d):
     # adjust this parameter to effectively change branching prob because beta1 and beta2 also
     # play a role, note that fb can affect beta1,2
     p1_adj = p1_norm*beta2/(beta1*(1-p1_norm))
-
+    #print(beta1*p1_adj/(beta1*p1_adj+beta2))
     dt_th1 = diff_precursor(th1, th0, d["alpha1"], beta1, d["beta1_p"], p1_adj, d)
     dt_th2 = diff_precursor(th2, th0, d["alpha2"], beta2, d["beta2_p"], p2_adj, d)
 
-    dt_th0 = -(d["beta1"]*p1_adj+d["beta2"])*th0    
+    dt_th0 = -(beta1*p1_adj+beta2)*th0    
     dt_state = np.concatenate(([dt_th0], dt_th1, dt_th2))
 
     return dt_state

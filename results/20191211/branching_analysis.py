@@ -47,45 +47,82 @@ d_comp2["beta1"] = 5.
 d_prec2["beta1"] = 5.
 d_prec2["beta2"] = 7.
 
-cells_prec1 = m_branch.run_model(d_prec1, t, fun = m_branch.branch_precursor)
-cells_comp1 = m_branch.run_model(d_comp1, t, fun = m_branch.branch_competetive)
-cells_prec2 = m_branch.run_model(d_prec2, t, fun = m_branch.branch_precursor)
-cells_comp2 = m_branch.run_model(d_comp2, t, fun = m_branch.branch_competetive)
+# =============================================================================
+# cells_prec1 = m_branch.run_model(d_prec1, t, fun = m_branch.branch_precursor)
+# cells_comp1 = m_branch.run_model(d_comp1, t, fun = m_branch.branch_competetive)
+# cells_prec2 = m_branch.run_model(d_prec2, t, fun = m_branch.branch_precursor)
+# cells_comp2 = m_branch.run_model(d_comp2, t, fun = m_branch.branch_competetive)
+# 
+# fig, ax = plt.subplots(1,2, figsize = (10,4.5))
+# 
+# ax[0].plot(t, cells_prec1[0], "k")
+# ax[0].plot(t, cells_prec2[0], "tab:blue")
+# ax[0].plot(t, cells_prec2[1], "tab:red")
+# 
+# ax[1].plot(t, cells_comp1[0], "k")
+# ax[1].plot(t, cells_comp2[0], "tab:blue")
+# ax[1].plot(t, cells_comp2[1], "tab:red")
+# 
+# for a in ax:
+#     #a.set_xlim(0, t[-1])
+#     a.set_ylim([0,0.5])
+#     a.set_xlabel("time")
+#     a.set_ylabel("cell dens. norm.")
+#     
+# ax[0].set_title("precursor model")
+# ax[1].set_title("competition model")
+# plt.tight_layout()
+# #fig.savefig(savepath+"timecourse.svg")
+# plt.close()
+# 
+# d_fb = dict(d_prec1)
+# x = 1
+# d_fb["alpha1"] = x
+# d_fb["beta1"] = float(x)
+# d_fb["alpha2"] = x
+# d_fb["beta2"] = float(x)
+# d_fb["fb_prob1"] = 1000
+# cells_fb = m_branch.run_model(d_fb,t)
+# cells_fb = np.swapaxes(cells_fb, 0,1)
+# fig,ax = plt.subplots()
+# ax.plot(t, cells_fb)
+# =============================================================================
 
-fig, ax = plt.subplots(1,2, figsize = (10,4.5))
+# =============================================================================
+# time course to show prob effect vs rate effect in precursor model
+# =============================================================================
+d1 = dict(d_prec1)
+d1["beta2"] = 5.
+d2 = dict(d_prec1)
+d2["p1_def"] = 0.4
 
-ax[0].plot(t, cells_prec1[0], "k")
-ax[0].plot(t, cells_prec2[0], "tab:blue")
-ax[0].plot(t, cells_prec2[1], "tab:red")
+d3 = dict(d1)
+d3["d_eff"] = 0
+d3["beta1_p"] = 0.00001
+d3["beta2_p"] = 0.00001
 
-ax[1].plot(t, cells_comp1[0], "k")
-ax[1].plot(t, cells_comp2[0], "tab:blue")
-ax[1].plot(t, cells_comp2[1], "tab:red")
+d4 = dict(d2)
+d4["d_eff"] = 0
+d4["beta1_p"] = 0.00001
+d4["beta2_p"] = 0.00001
 
-for a in ax:
-    #a.set_xlim(0, t[-1])
-    a.set_ylim([0,0.5])
+dicts = [d2,d4,d1,d3]
+cells = [m_branch.run_model(dic, t) for dic in dicts]
+titles = [r"$\beta_1 = \beta_2 , p_1 \neq p_2$", r"$\beta_1 \neq \beta_2 , p_1 = p_2$"]
+
+fig, ax = plt.subplots(1,2, figsize = (10,4))
+for i in range(2):
+    a = ax[i]
+    a.plot(t, cells[2*i][0], "tab:blue")
+    a.plot(t, cells[2*i][1], "tab:red")
+    a.plot(t, cells[2*i+1][0], "tab:blue", alpha = 0.5)
+    a.plot(t, cells[2*i+1][1], "tab:red", alpha = 0.5)
     a.set_xlabel("time")
     a.set_ylabel("cell dens. norm.")
-    
-ax[0].set_title("precursor model")
-ax[1].set_title("competition model")
+    a.set_title(titles[i])
+    a.set_ylim([0,0.7])
 plt.tight_layout()
-#fig.savefig(savepath+"timecourse.svg")
-plt.close()
-
-d_fb = dict(d_prec1)
-x = 1
-d_fb["alpha1"] = x
-d_fb["beta1"] = float(x)
-d_fb["alpha2"] = x
-d_fb["beta2"] = float(x)
-d_fb["fb_prob1"] = 1000
-cells_fb = m_branch.run_model(d_fb,t)
-cells_fb = np.swapaxes(cells_fb, 0,1)
-fig,ax = plt.subplots()
-ax.plot(t, cells_fb)
-
+fig.savefig(savepath+"time_course_prec.svg")
 # =============================================================================
 # time course to show feedback effect on prob and fb effect on rate
 # =============================================================================
@@ -104,21 +141,28 @@ val = 1
 d_fb_prob2 = m_branch.update_dict(val, name, d_fb_prob1)
 d_fb_rate2 = m_branch.update_dict(val, name, d_fb_rate1)
 
-dicts = [d_fb_prob1, d_fb_prob2, d_fb_rate1, d_fb_rate2]
+d_no_fb = dict(d_prec1)
+d_no_fb1 = m_branch.update_dict(val, name, d_no_fb)
+
+dicts = [d_no_fb, d_no_fb1, d_fb_prob1, d_fb_prob2, d_fb_rate1, d_fb_rate2]
 cells = [m_branch.run_model(dic, t) for dic in dicts]
-
-fig, ax = plt.subplots(1,2, figsize = (10,4))
+titles = ["no fb", "fb --> prob", "fb --> rate"]
+fig, ax = plt.subplots(1,3, figsize = (15,4))
 # time course fb on prob (single step vs multistep)
-ax[0].plot(t, cells[0][0], c = "tab:blue")
-ax[0].plot(t, cells[0][1], c = "tab:red")
-ax[0].plot(t, cells[1][0], c = "tab:blue", ls = "--")
-ax[0].plot(t, cells[1][1], c = "tab:red", ls = "--")
-# time course fb on rate (single step vs multistep)
-ax[1].plot(t, cells[2][0], c = "tab:blue")
-ax[1].plot(t, cells[2][1], c = "tab:red")
-ax[1].plot(t, cells[3][0], c = "tab:blue", ls = "--")
-ax[1].plot(t, cells[3][1], c = "tab:red", ls = "--")
 
+for i in range(3):
+    a = ax[i]
+    a.plot(t, cells[2*i][0], c = "tab:blue")
+    a.plot(t, cells[2*i][1], c = "tab:red")
+    a.plot(t, cells[2*i+1][0], c = "tab:blue", ls = "--")
+    a.plot(t, cells[2*i+1][1], c = "tab:red", ls = "--")
+    a.set_title(titles[i])
+    a.set_ylabel("cell dens. norm.")
+    a.set_xlabel("time")
+    a.set_ylim([0,0.5])
+
+plt.tight_layout()
+fig.savefig(savepath+"time_course_fb_rate_prob.svg")
 # =============================================================================
 # analyze feedback in precursor model for fb on prob fb on rate and both for all
 # readouts and for diff chain lenghts
