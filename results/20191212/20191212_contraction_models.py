@@ -199,7 +199,7 @@ labels = ["timer t0", r"$\beta_e$", "crit. IL2", "Carrying Capacity"]
 label2 = r"$\beta_p$"
 
 vmin = 0
-vmax = 50
+vmax = 5
 
 model_type = "il2_beta"
 readout = "area"

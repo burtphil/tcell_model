@@ -34,7 +34,7 @@ def th_cell_diff(th_state, time, d):
     tnoil2 = np.sum(th_state[-d["alpha_p"]:])
 
     #carrying capacity
-    x_tot = np.sum(th_state)
+    il7_consumers = teff+tnoil2
     conc_il2 = d["rate_il2"]*(tnaive+teff)
 
     # mm kinetic feedback implementation  
@@ -60,7 +60,7 @@ def th_cell_diff(th_state, time, d):
             # define criteria upon which apoptosis is induced
             crit_time = time > d["crit_timer"]
             crit_il2 = conc_il2 < d["crit_il2"]
-            crit_il7 = x_tot > d["crit_il7"]
+            crit_il7 = il7_consumers > d["crit_il7"]
             
             c1 = d["mode"] == "timer" and crit_time
             c2 = d["mode"] == "il2" and crit_il2
