@@ -32,10 +32,13 @@ def th_cell_diff(th_state, time, d):
     tnaive = np.sum(th_state[:-(2*d["alpha_p"])])
     teff = np.sum(th_state[-(2*d["alpha_p"]):-d["alpha_p"]])
     tnoil2 = np.sum(th_state[-d["alpha_p"]:])
+    
+    # get IL2 producers (depending on alpha IL2)
+    t_il2 = np.sum(th_state[:d["alpha_IL2"]])
+    conc_il2 = d["rate_il2"]*t_il2
 
     #carrying capacity
     il7_consumers = teff+tnoil2
-    conc_il2 = d["rate_il2"]*(tnaive+teff)
 
     # mm kinetic feedback implementation  
     fb_ifn = 0
@@ -67,8 +70,9 @@ def th_cell_diff(th_state, time, d):
             c3 = d["mode"] == "il7" and crit_il7
             c4 = d["mode"] == "timer+" and (crit_time or crit_il7)
             c5 = d["mode"] == "il2+" and (crit_il2 or crit_il7)
+            c6 = d["mode"] == "il2_timer" and (crit_il2 or crit_time)
  
-            crits = np.array([c1,c2,c3,c4,c5])
+            crits = np.array([c1,c2,c3,c4,c5,c6])
             if crits.any():
                 d["t0"] = time
                 d["crit"] = True  
@@ -337,6 +341,7 @@ def vary_param(arr, name, ids, time, d, model = th_cell_diff):
     dict_list = [update_dict(val, name, d) for val in arr]
     readouts = [get_readouts2(time, dic) for dic in dict_list]
     readouts = [get_readout_subset(readout, ids) for readout in readouts]
+
     return readouts
    
 def param_scan(param_names, dicts, titles, ids, time, filename, p_labels, ylim = [-2,2], 
