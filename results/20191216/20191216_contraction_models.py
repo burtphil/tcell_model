@@ -36,7 +36,7 @@ d_null = {
         "crit_timer" : 1.5,
         "crit_il7" : 2.5,
         "crit_il2" : 0.2,
-        "rate_il2" : 100.0,
+        "rate_il2" : 1000.0,
         "beta_sad" : 0,
         "fb_il2" : 1.0,
         "alpha_IL2" : 5,
@@ -153,7 +153,7 @@ ax.set_ylabel("log2FC")
 ax.xaxis.set_major_formatter(ScalarFormatter())
 ax.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
 ax.set_xticks(np.arange(20,80,10))
-ax.set_title("area")
+ax.set_title("peak max.")
 ax.legend()
 plt.tight_layout()
-fig.savefig(savepath+"rate_prolif_models_area.svg")
+fig.savefig(savepath+"rate_prolif_models_peak.svg")

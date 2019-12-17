@@ -31,11 +31,13 @@ def th_cell_diff(th_state, time, d):
     dt_state = np.zeros_like(th_state)
     tnaive = np.sum(th_state[:-(2*d["alpha_p"])])
     teff = np.sum(th_state[-(2*d["alpha_p"]):-d["alpha_p"]])
+    # this is the beta sad IL2 population
     tnoil2 = np.sum(th_state[-d["alpha_p"]:])
     
     # get IL2 producers (depending on alpha IL2)
     t_il2 = np.sum(th_state[:d["alpha_IL2"]])
-    conc_il2 = d["rate_il2"]*t_il2
+    t_noil2 = np.sum(th_state)-t_il2
+    conc_il2 = d["rate_il2"]*t_il2/(0.001+t_noil2)
 
     #carrying capacity
     il7_consumers = teff+tnoil2
@@ -56,7 +58,7 @@ def th_cell_diff(th_state, time, d):
     #if d["mode"] in ["il7", "il2", "timer"]:
     #    beta_p = beta_p*(1-(x_tot/d["crit_il7"]))
     
-    if d["mode"] in ["il7", "il2", "timer", "il2+", "timer+"]:
+    if d["mode"] in ["il7", "il2", "timer", "il2_timer", "il2+", "timer+"]:
         if d["crit"] == True:
             beta_p = beta_p*np.exp(-d["decay_p"]*(time-d["t0"]))
         else:
@@ -510,7 +512,8 @@ def heatmap(arr1, arr2, name1, name2, time, params, readout_type, norm):
         d[name2] = a2
         readouts = get_readouts2(time, d)
         readout = readouts[readout_type]
-        readout = np.log2(readout/norm)
+        if norm != None:
+            readout = np.log2(readout/norm)
         z.append(readout)  
     
     #print(len(z))
@@ -522,9 +525,13 @@ def heatmap(arr1, arr2, name1, name2, time, params, readout_type, norm):
     
     return heatmap_arr
 
-def get_heatmap(arr1, arr2, name1, name2, time, params, readout_type):
+def get_heatmap(arr1, arr2, name1, name2, time, params, readout_type, 
+                normalize = True):
     
-    norm = get_readouts2(time, params)[readout_type]
+    if normalize == True:
+        norm = get_readouts2(time, params)[readout_type]
+    else:
+        norm = None
     heatmap_arr = heatmap(arr1, arr2, name1, name2, time, params, readout_type, norm)
 
     return heatmap_arr
