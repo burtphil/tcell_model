@@ -73,13 +73,17 @@ def run_model(time, d, model, initial_cells):
 
     return state
 
-def run_exp(time, cond, cond_names, model = th_cell_diff, initial_cells = 1):
+def run_exp(time, cond, cond_names, model = th_cell_diff, initial_cells = 1,
+            keep_naive = False):
     if model == th_cell_diff:
         cell_names = ["naive", "teff"]
     else:
         cell_names = ["Th1", "Tfh"]
     states = [run_model(time, d, model, initial_cells) for d in cond]
     df = df_from_exp(time, states, cond_names, cell_names)
+    
+    if keep_naive == False:
+        df = df[df["cell"] != "naive"]
     return df 
 
 def df_from_exp(time, states, cond_names, cell_names):
@@ -139,7 +143,11 @@ def update_dict(d, val, name):
     d[name] = val
     
     return d
-    
+
+def update_dicts(dicts, val, name):
+    dicts = [update_dict(dic, val, name) for dic in dicts]
+    return dicts
+
 def get_tidy_readouts(p, param_name, time, cond, cond_names):
     cond = [update_dict(d, p, param_name) for d in cond]
     
@@ -153,3 +161,22 @@ def get_tidy_readouts(p, param_name, time, cond, cond_names):
     df2["x"] = p
 
     return df2
+
+def f(x,y):
+    x["cond2"] = y
+    return x
+
+def multi_exp(time, cond_list, cond_names, cond_names2, 
+              model = th_cell_diff, initial_cells = 1):
+    """
+    cond list should be a list of lists inner list for single exp with diff conditions,
+    outer list list of second conditions
+    """
+    assert len(cond_list) == len(cond_names2)
+    
+    exp_list = [run_exp(time, cond, cond_names, model, initial_cells) for cond in cond_list]
+
+    exp_list = [f(exp, name) for exp, name in zip(exp_list, cond_names2)]
+    exp = pd.concat(exp_list)
+    
+    return exp
