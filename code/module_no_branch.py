@@ -28,8 +28,7 @@ def th_cell_diff(th_state, time, d):
     and number of precursor cells
     """
 
-    dt_state = np.zeros_like(th_state)
-    tnaive = np.sum(th_state[:-(2*d["alpha_p"])])
+    #tnaive = np.sum(th_state[:-(2*d["alpha_p"])])
     teff = np.sum(th_state[-(2*d["alpha_p"]):-d["alpha_p"]])
     # this is the beta sad IL2 population
     tnoil2 = np.sum(th_state[-d["alpha_p"]:])
@@ -49,18 +48,54 @@ def th_cell_diff(th_state, time, d):
         fb_ifn = (d["fb_ifn"]*conc_ifn**3)/(conc_ifn**3+d["K_ifn"]**3)
   
     beta = (fb_ifn+1)*d["beta"]
-
-    beta_p = d["beta_p"]
     
+    beta_p = d["beta_p"]
+    rate_death = d["d_eff"]
+
     # check if crit has been updated from F to T, if not
     # check if crit should be updated, then store t0 time of update
     # if crit has been updated, update prolif rate
-    #if d["mode"] in ["il7", "il2", "timer"]:
-    #    beta_p = beta_p*(1-(x_tot/d["crit_il7"]))
     
+    check_homeostasis(d, time, conc_il2, il7_consumers, rate_death, beta_p)
+    
+    dt_state = diff_effector(th_state, teff, d, beta, rate_death, beta_p)
+        
+ 
+    return dt_state
+
+def diff_effector(th_state, teff, d, beta, rate_death, beta_p):
+    dt_state = np.zeros_like(th_state)
+    #print(th_state.shape)
+
+    for j in range(len(th_state)):
+        #print(j)
+        if j == 0:
+            dt_state[j] = d["b"]-beta*th_state[j] 
+            
+        elif j < d["alpha"]:
+            dt_state[j] = beta*th_state[j-1]-(beta+d["d_prec"])*th_state[j]
+            
+        elif j == d["alpha"]:
+            dt_state[j] = beta*th_state[j-1] + (2*beta_p*th_state[(d["alpha"]+d["alpha_p"]-1)]) - (rate_death+d["beta_sad"]+beta_p)*th_state[j]       
+
+        elif j < (d["alpha"]+d["alpha_p"]):
+            dt_state[j] = beta_p*th_state[j-1]-(beta_p+rate_death+d["beta_sad"])*th_state[j]   
+        
+        elif j == (d["alpha"]+d["alpha_p"]):
+            dt_state[j] = d["beta_sad"]*teff + (2*beta_p*th_state[-1]) - (rate_death+beta_p)*th_state[j]       
+        
+        else:
+            dt_state[j] = beta_p*th_state[j-1]-(beta_p+rate_death)*th_state[j]
+        
+    return dt_state
+    
+def check_homeostasis(d, time, conc_il2, il7_consumers, rate_death, beta_p):
     if d["mode"] in ["il7", "il2", "timer", "il2_timer", "il2+", "timer+"]:
         if d["crit"] == True:
-            beta_p = beta_p*np.exp(-d["decay_p"]*(time-d["t0"]))
+            if d["death_mode"] == True:
+                rate_death = rate_death*np.exp(time-d["t0"])
+            else:
+                beta_p = beta_p*np.exp(-d["decay_p"]*(time-d["t0"]))
         else:
             # define criteria upon which apoptosis is induced
             crit_time = time > d["crit_timer"]
@@ -77,30 +112,8 @@ def th_cell_diff(th_state, time, d):
             crits = np.array([c1,c2,c3,c4,c5,c6])
             if crits.any():
                 d["t0"] = time
-                d["crit"] = True  
-
-    for j in range(len(th_state)):
-        #print(j)
-        if j == 0:
-            dt_state[j] = d["b"]-beta*th_state[j] 
-            
-        elif j < d["alpha"]:
-            dt_state[j] = beta*th_state[j-1]-(beta+d["d_prec"])*th_state[j]
-            
-        elif j == d["alpha"]:
-            dt_state[j] = beta*th_state[j-1] + (2*beta_p*th_state[(d["alpha"]+d["alpha_p"]-1)]) - (d["d_eff"]+d["beta_sad"]+beta_p)*th_state[j]       
-
-        elif j < (d["alpha"]+d["alpha_p"]):
-            dt_state[j] = beta_p*th_state[j-1]-(beta_p+d["d_eff"]+d["beta_sad"])*th_state[j]   
-        
-        elif j == (d["alpha"]+d["alpha_p"]):
-            dt_state[j] = d["beta_sad"]*teff + (2*beta_p*th_state[-1]) - (d["d_eff"]+beta_p)*th_state[j]       
-        
-        else:
-            dt_state[j] = beta_p*th_state[j-1]-(beta_p+d["d_eff"])*th_state[j]
-            
-    return dt_state
-
+                d["crit"] = True 
+                
 def th_cell_diff2(th_state, time, d):
     """
     model2
@@ -578,7 +591,6 @@ def sensitivity_analysis(arr, name, ids, time, dicts):
     # divide by default values
     #readouts = np.log2(readouts / readouts[:,1,:])
     return reads
-
 
 def plot_sensitivity_analysis(reads, labels, title):
     x = np.arange(len(labels))
