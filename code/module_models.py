@@ -15,6 +15,8 @@ def th_cell_diff(th_state, time, d):
     needs alpha and beta(r) of response time distribution, probability
     and number of precursor cells
     """
+    assert d["alpha_IL2"] < d["alpha"]
+    
     #tnaive = np.sum(th_state[:-(2*d["alpha_p"])])
     teff = np.sum(th_state[-(2*d["alpha_p"]):-d["alpha_p"]])
     # this is the beta sad IL2 population
@@ -23,7 +25,8 @@ def th_cell_diff(th_state, time, d):
     # get IL2 producers (depending on alpha IL2)
     t_il2 = np.sum(th_state[:d["alpha_IL2"]])
     t_noil2 = np.sum(th_state)-t_il2
-    conc_il2 = d["rate_il2"]*t_il2/(0.001+t_noil2)
+    
+    conc_il2 = d["rate_il2"]*t_il2/(d["K_il2"]+t_noil2)
 
     #carrying capacity
     il7_consumers = teff+tnoil2
@@ -42,37 +45,39 @@ def th_cell_diff(th_state, time, d):
     # check if crit has been updated from F to T, if not
     # check if crit should be updated, then store t0 time of update
     # if crit has been updated, update prolif rate
-    
-    if d["mode"] in ["il7", "il2", "timer", "il2_timer", "il2+", "timer+"]:
-
-        if d["crit"] == True:
-            if d["death_mode"] == True:
-                rate_death = rate_death*np.exp(time-d["t0"])
-            else:
-                beta_p = beta_p*np.exp(-d["decay_p"]*(time-d["t0"]))
-        else:
-            # define criteria upon which apoptosis is induced
-            crit_time = time > d["crit_timer"]
-            crit_il2 = conc_il2 < d["crit_il2"]
-            crit_il7 = il7_consumers > d["crit_il7"]
-            
-            c1 = d["mode"] == "timer" and crit_time
-            c2 = d["mode"] == "il2" and crit_il2
-            c3 = d["mode"] == "il7" and crit_il7
-            c4 = d["mode"] == "timer+" and (crit_time or crit_il7)
-            c5 = d["mode"] == "il2+" and (crit_il2 or crit_il7)
-            c6 = d["mode"] == "il2_timer" and (crit_il2 or crit_time)
- 
-            crits = np.array([c1,c2,c3,c4,c5,c6])
-            if crits.any():
-                d["t0"] = time
-                d["crit"] = True 
+    if d["crit"] == False:
+        update_t0(d, time, conc_il2, il7_consumers)
+    elif d["death_mode"] == False:
+        beta_p = beta_p*np.exp(-d["decay_p"]*(time-d["t0"]))
+    else:
+        rate_death = rate_death*np.exp(time-d["t0"])
                 
     dt_state = diff_effector(th_state, teff, d, beta, rate_death, beta_p)
         
  
     return dt_state
 
+def update_t0(d, time, conc_il2, il7_consumers):
+
+    if d["mode"] in ["il7", "il2", "timer", "il2_timer", "il2+", "timer+"]:
+        crit_time = time > d["crit_timer"]
+        crit_il2 = conc_il2 < d["crit_il2"]
+        crit_il7 = il7_consumers > d["crit_il7"]
+        
+        c1 = d["mode"] == "timer" and crit_time
+        # add time constraint because for time = 0 conc_il2 = 0
+        c2 = d["mode"] == "il2" and crit_il2 and time > 0.1
+        c3 = d["mode"] == "il7" and crit_il7
+        c4 = d["mode"] == "timer+" and (crit_time or crit_il7)
+        c5 = d["mode"] == "il2+" and (crit_il2 or crit_il7)
+        c6 = d["mode"] == "il2_timer" and (crit_il2 or crit_time)
+ 
+        crits = np.array([c1,c2,c3,c4,c5,c6])
+        if crits.any():
+            d["crit"] = True  
+            d["t0"] = time
+            
+    
 def diff_effector(th_state, teff, d, beta, rate_death, beta_p):
     dt_state = np.zeros_like(th_state)
     #print(th_state.shape)
@@ -134,7 +139,7 @@ def diff_effector2(state, th0, alpha, beta, beta_p, p, d):
                
     return dt_state
 
-def diff_precursor(state, th0, alpha, beta, beta_p, p_adj, d):
+def diff_precursor(state, th0, alpha, beta, beta_p, p_adj, rate_death, d):
     """
     takes state vector to differentiate effector cells as linear chain
     needs alpha and beta(r) of response time distribution, probability
@@ -150,11 +155,11 @@ def diff_precursor(state, th0, alpha, beta, beta_p, p_adj, d):
         elif j == alpha:
             # the problem with the 4 and 2 is that since differentiation takes 1 day it should divide twice giving 4 cells
             # however, if it has arrived in the final states if should double every half day
-            dt_state[j] = beta*state[j-1]+2*beta_p*state[-1] - (d["d_eff"]+beta_p)*state[j] 
+            dt_state[j] = beta*state[j-1]+2*beta_p*state[-1] - (rate_death+beta_p)*state[j] 
             
         else:
             assert j > alpha        
-            dt_state[j] = beta_p*state[j-1]-(beta_p+d["d_eff"])*state[j] 
+            dt_state[j] = beta_p*state[j-1]-(beta_p+rate_death)*state[j] 
                  
     return dt_state
 
@@ -204,7 +209,8 @@ def branch_precursor(state, time, d):
     needs alpha and beta(r) of response time distribution, probability
     and number of precursor cells
     """
-
+    assert d["alpha_IL2"] < d["alpha1"] and d["alpha_IL2"] < d["alpha2"]
+    
     th0 = state[0]
     
     th1 = state[1:(d["alpha1"]+d["alpha1_p"]+1)]
@@ -213,38 +219,65 @@ def branch_precursor(state, time, d):
     ### get all cytokine secreting cells    
     th1_all = np.sum(th1[-d["alpha1_p"]:])
     th2_all = np.sum(th2[-d["alpha2_p"]:])
+    
+    t_eff = th1_all+th2_all
+    t_il2 = np.sum(th1[:d["alpha_IL2"]]) + np.sum(th2[:d["alpha_IL2"]])
+
     ### calculate cytokine concentrations
     cyto_1 = d["beta_cyto_1"]*th1_all + d["ifn_ext"]
     cyto_2 = d["beta_cyto_2"]*th2_all + d["il21_ext"]
-    
-    ### calculate probability 
-    p1 = d["fb_prob1"]*cyto_1**3/(cyto_1**3+d["K_1"]**3)
-    p2 = d["fb_prob2"]*cyto_2**3/(cyto_2**3+d["K_2"]**3)
-    # account for default probability and feedback strength
+        
+    conc_il2 = d["rate_il2"]*t_il2/(d["K_il2"]+t_eff)
 
-    p1 = (p1+1)*d["p1_def"]
-    p2 = (p2+1)*(1-d["p1_def"])
-
-    ### this is the effective probability after feedback integration 
-    p1_norm = p1/(p1+p2)
-    #p2_norm = 1-p1_norm
-    p2_adj = 1.
-
-    ### calculate fb rate effects
+    # compute feedbacks
     fb1 = d["fb_rate1"]*cyto_1**3/(cyto_1**3+d["K_1"]**3)
     fb2 = d["fb_rate2"]*cyto_2**3/(cyto_2**3+d["K_2"]**3)
     ### update differantiation rate
     beta1 = d["beta1"]*(1+fb1)
-    beta2 = d["beta2"]*(1+fb2)
-      
-    # adjust this parameter to effectively change branching prob because beta1 and beta2 also
-    # play a role, note that fb can affect beta1,2
-    p1_adj = p1_norm*beta2/(beta1*(1-p1_norm))
+    beta2 = d["beta2"]*(1+fb2)   
+    
+    ### calculate probability, note that these are adjusted to beta1 beta2 so that
+    # they are not necessarily \in (0,1)
+    p1, p2 = get_prob(d, beta1, beta2, cyto_1, cyto_2)
+    
     #print(beta1*p1_adj/(beta1*p1_adj+beta2))
-    dt_th1 = diff_precursor(th1, th0, d["alpha1"], beta1, d["beta1_p"], p1_adj, d)
-    dt_th2 = diff_precursor(th2, th0, d["alpha2"], beta2, d["beta2_p"], p2_adj, d)
+    beta1_p = d["beta1_p"]
+    beta2_p = d["beta2_p"]
+    rate_death = d["d_eff"]   
+    
+    # check for homeostasis regulation
+    if d["crit"] == False:
+        update_t0(d, time, conc_il2, t_eff)
+    elif d["death_mode"] == False:
+        assert d["crit"] == True       
+        beta1_p = beta1_p*np.exp(-d["decay_p"]*(time-d["t0"]))
+        beta2_p = beta2_p*np.exp(-d["decay_p"]*(time-d["t0"]))
 
-    dt_th0 = -(beta1*p1_adj+beta2)*th0    
+    else:
+        rate_death = rate_death*np.exp(time-d["t0"])
+
+    # this is the actual differentiation where odes are computed    
+    dt_th1 = diff_precursor(th1, th0, d["alpha1"], beta1, beta1_p, p1, rate_death, d)
+    dt_th2 = diff_precursor(th2, th0, d["alpha2"], beta2, beta2_p, p2, rate_death, d)
+    dt_th0 = -(beta1*p1+beta2)*th0    
     dt_state = np.concatenate(([dt_th0], dt_th1, dt_th2))
 
     return dt_state
+
+
+def get_prob(d, beta1, beta2, cyto_1, cyto_2):
+    p1 = d["fb_prob1"]*cyto_1**3/(cyto_1**3+d["K_1"]**3)
+    p2 = d["fb_prob2"]*cyto_2**3/(cyto_2**3+d["K_2"]**3)
+    # account for default probability and feedback strength
+    p1 = (p1+1)*d["p1_def"]
+    p2 = (p2+1)*(1-d["p1_def"])
+    ### this is the effective probability after feedback integration 
+    p1_norm = p1/(p1+p2)
+    #p2_norm = 1-p1_norm
+    p2_adj = 1.
+    ### calculate fb rate effects
+    # adjust this parameter to effectively change branching prob because beta1 and beta2 also
+    # play a role, note that fb can affect beta1,2
+    p1_adj = p1_norm*beta2/(beta1*(1-p1_norm))
+    
+    return p1_adj, p2_adj
