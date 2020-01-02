@@ -75,15 +75,18 @@ def run_model(time, d, model, initial_cells):
 
 def run_exp(time, cond, cond_names, model = th_cell_diff, initial_cells = 1,
             keep_naive = False):
+    
     if model == th_cell_diff:
         cell_names = ["naive", "teff"]
     else:
         cell_names = ["Th1", "Tfh"]
+        
     states = [run_model(time, d, model, initial_cells) for d in cond]
     df = df_from_exp(time, states, cond_names, cell_names)
     
     if keep_naive == False:
         df = df[df["cell"] != "naive"]
+        
     return df 
 
 def df_from_exp(time, states, cond_names, cell_names):
@@ -119,23 +122,78 @@ def generate_readouts(df, time):
     
     return df
 
-def vary_param(param_arr, param_name, time, cond, cond_names, norm):
-    # change cond dicts for each parameter
-    df_arr = [get_tidy_readouts(p, param_name, time, cond, cond_names) for p in param_arr]
+def vary_param(param_arr, param_name, time, cond, cond_names, norm, model = th_cell_diff):
+    """
+    vary parameter values get readouts for different conditions
+    cond: list of parameter dictioniaries for each condition
+    cond_names: list of condition names
+    param_arr: array of parameter values
+    param_name: name of parameter to be varied
+    norm: parameter value to normalize against
+    ! note that norm value needs to be in param_arr
+    returns df with readouts for each cell and condition and parameter value
+    """    
+    df_arr = [get_tidy_readouts(p, param_name, time, cond, cond_names, model) for p in param_arr]
     df = pd.concat(df_arr)
 
-    # get values for norm conditions and merge to original data frame
+    # get values for norm condition (all cell types all conditions all readouts) and merge to original data frame
+    # check that provided normalization value is in provided array
+    assert (norm == param_arr).any() == True
     df_norm = df[df["x"] == norm]
     # kick out x val columns
     df_norm = df_norm.iloc[:,:-1]
-    df_norm = df_norm.rename(columns = {"y":"norm"})
+    df_norm = df_norm.rename(columns = {"y":"ynorm"})
+
     df = pd.merge(left = df, right = df_norm, how = "left", 
                    left_on = ["cond", "cell", "readout"], 
                    right_on = ["cond", "cell", "readout"])
     
-    df["ylog"] = np.log2(df["y"]/df["norm"])
+    df["ylog"] = np.log2(df["y"]/df["ynorm"])
+    
+    pname = convert_name(param_name)
+    df["pname"] = pname
     
     return df
+
+def get_relative_readouts(df):
+    """
+    take dataframe from vary_param and compute relative readouts
+    """
+    
+    #split dataframe to have one df for each cell type
+    df1 = df[df["cell"] == "Th1"]
+    df2 = df[df["cell"] == "Tfh"]
+   
+    # use df1 as basis for new df
+    df_base = df1[["cond", "readout", "pname", "x"]]
+    
+    df_base = df_base.reset_index(drop = True)
+    df1 = df1[["y", "ynorm"]].reset_index(drop = True)
+    df2 = df2[["y", "ynorm"]].reset_index(drop = True)
+    
+    # divide dfs of cell types with y and ynorm values and compute logFC
+    # then combine with base df
+    
+    df3 = df1/df2 
+    df3["ylog"] = np.log2(df3["y"]/df3["ynorm"])
+    
+    df_base = pd.concat([df_base, df3], axis = 1)
+    df_base = df_base.rename(columns = {"readout":"readout(rel)"})
+    
+    return df_base
+
+def multi_param(param_arrays, param_names, time, cond,
+                cond_names, norm_list, model = th_cell_diff):
+    
+    df_arr =[vary_param(param_arr, param_name, time, cond, cond_names, norm, model) for param_arr, param_name, norm in zip(param_arrays, param_names, norm_list)]
+    
+    if model == branch_precursor or model == branch_competetive:
+        df_arr = [get_relative_readouts(df) for df in df_arr]
+    
+    df = pd.concat(df_arr)
+    
+    return df
+
 
 def update_dict(d, val, name):
     
@@ -148,16 +206,17 @@ def update_dicts(dicts, val, name):
     dicts = [update_dict(dic, val, name) for dic in dicts]
     return dicts
 
-def get_tidy_readouts(p, param_name, time, cond, cond_names):
+def get_tidy_readouts(p, param_name, time, cond, cond_names, model):
     cond = [update_dict(d, p, param_name) for d in cond]
     
-    df = run_exp(time, cond, cond_names)
+    df = run_exp(time, cond, cond_names, model)
     df2 = generate_readouts(df, time)
     df2 = pd.melt(df2.reset_index(), 
                   id_vars = ["cond", "cell"],
                   value_vars = ["area", "peak", "tau", "decay"], 
                   var_name = "readout",
                   value_name = "y")
+    
     df2["x"] = p
 
     return df2
@@ -180,3 +239,18 @@ def multi_exp(time, cond_list, cond_names, cond_names2,
     exp = pd.concat(exp_list)
     
     return exp
+
+def convert_name(name: str) -> str:
+    """
+    take input name and return as string that is nicer to read for plotting
+    """
+    d = {
+        "beta" : r"$\beta$",
+        "alpha" : r"$\alpha$",
+        "beta1" : r"$\beta_1$",
+        "crit_timer" : "t0",
+        "rate_il2" : "rate il2"}
+    
+    n = d[name]
+    
+    return n

@@ -1,0 +1,1 @@
+make a simple parameter variation. goal is to allow vary param function to handle branched models with relative readouts and multiple conditions. for this I need to split the vary param data frame to have independent columns cell1 cell2
