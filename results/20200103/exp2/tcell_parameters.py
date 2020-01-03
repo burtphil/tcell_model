@@ -6,8 +6,8 @@ d_comp = {
           "beta2" : 10.,
           "alpha1_p" : 10,
           "alpha2_p" : 10,
-          "beta1_p" : 10,
-          "beta2_p" : 10,  
+          "beta1_p" : 30,
+          "beta2_p" : 30,  
           "fb_rate1" : 0,
           "fb_rate2" : 0,
           "fb_prob1" : 0,
@@ -23,8 +23,8 @@ d_comp = {
           "mode" : "Null",
           "crit" : False,
           "crit_il2" : 0.5,
-          "crit_il7" : 10,
-          "crit_timer" : 2,
+          "crit_il7" : 2.5,
+          "crit_timer" : 1.5,
           "rate_il2" : 10000,
           "alpha_IL2" : 7,
           "K_il2" : 0.0001,
@@ -36,3 +36,12 @@ d_comp = {
 # calculate corresponding beta values for precursor model
 d_prec = dict(d_comp)
 d_prec["p1_def"] = 0.5
+
+d_prec_il7 = dict(d_prec)
+d_prec_il7["mode"] = "il7"
+
+d_prec_il2 = dict(d_prec)
+d_prec_il2["mode"] = "il2"
+
+d_prec_timer = dict(d_prec)
+d_prec_timer["mode"] = "timer"

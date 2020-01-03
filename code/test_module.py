@@ -185,11 +185,11 @@ def get_relative_readouts(df):
     return df_base
 
 def multi_param(param_arrays, param_names, time, cond,
-                cond_names, norm_list, model = th_cell_diff):
+                cond_names, norm_list, model = th_cell_diff, relative_readouts = False):
     
     df_arr =[vary_param(param_arr, param_name, time, cond, cond_names, norm, model) for param_arr, param_name, norm in zip(param_arrays, param_names, norm_list)]
     
-    if model == branch_precursor or model == branch_competetive:
+    if (model == branch_precursor or model == branch_competetive) and relative_readouts == True:
         df_arr = [get_relative_readouts(df) for df in df_arr]
     
     df = pd.concat(df_arr)
@@ -253,7 +253,8 @@ def convert_name(name: str) -> str:
         "beta_p": r"$\beta_p$",
         "beta1" : r"$\beta_1$",
         "crit_timer" : "t0",
-        "rate_il2" : "rate il2"}
+        "rate_il2" : "rate il2",
+        "p1_def" : "$p_1$"}
     
     n = d[name]
     
