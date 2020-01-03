@@ -138,7 +138,9 @@ def vary_param(param_arr, param_name, time, cond, cond_names, norm, model = th_c
 
     # get values for norm condition (all cell types all conditions all readouts) and merge to original data frame
     # check that provided normalization value is in provided array
-    assert (norm == param_arr).any() == True
+    assert np.amin(param_arr) <= norm <= np.amax(param_arr)
+    # adjust norm to always be in param arr by changing norm to closest matching value in param_arr
+    norm = param_arr[np.argmin(np.abs(norm-param_arr))]
     df_norm = df[df["x"] == norm]
     # kick out x val columns
     df_norm = df_norm.iloc[:,:-1]
@@ -247,6 +249,8 @@ def convert_name(name: str) -> str:
     d = {
         "beta" : r"$\beta$",
         "alpha" : r"$\alpha$",
+        "d_eff" : "death rate",
+        "beta_p": r"$\beta_p$",
         "beta1" : r"$\beta_1$",
         "crit_timer" : "t0",
         "rate_il2" : "rate il2"}
