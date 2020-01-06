@@ -5,7 +5,7 @@ d_null = {
         "alpha" : 10,
         "beta" : 10.,
         "alpha_p" : 10,
-        "beta_p" : 10.,
+        "beta_p" : 30.,
         "beta_sad" : 0,
         "d_eff" : 1.5,
         "d_prec" : 0,
@@ -16,14 +16,14 @@ d_null = {
         "K_ifn" : 1.0,
         "fb_ifn" : 0,
         "crit" : False,
-        "crit_timer" : 1.5,
-        "crit_il7" : 2.5,
-        "crit_il2" : 0.5,
+        "crit_timer" : 2.4,
+        "crit_il7" : 2,
+        "crit_il2" : 0.1,
         "t0" : None,
         "alpha_IL2" : 8,
         "decay_p" : 1.,
         "death_mode" : False,
-        "K_il2": 0.001
+        "K_il2": 0.0001
         }
 
 d_il7 = dict(d_null)

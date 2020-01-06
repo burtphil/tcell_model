@@ -5,7 +5,7 @@ d_null = {
         "alpha" : 10,
         "beta" : 10.,
         "alpha_p" : 10,
-        "beta_p" : 10.,
+        "beta_p" : 30.,
         "beta_sad" : 0,
         "d_eff" : 1.5,
         "d_prec" : 0,
