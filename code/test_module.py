@@ -122,7 +122,8 @@ def generate_readouts(df, time):
     
     return df
 
-def vary_param(param_arr, param_name, time, cond, cond_names, norm, model = th_cell_diff):
+def vary_param(param_arr, param_name, time, cond, cond_names, norm, model = th_cell_diff,
+               convert = True):
     """
     vary parameter values get readouts for different conditions
     cond: list of parameter dictioniaries for each condition
@@ -138,6 +139,7 @@ def vary_param(param_arr, param_name, time, cond, cond_names, norm, model = th_c
 
     # get values for norm condition (all cell types all conditions all readouts) and merge to original data frame
     # check that provided normalization value is in provided array
+
     assert np.amin(param_arr) <= norm <= np.amax(param_arr)
     # adjust norm to always be in param arr by changing norm to closest matching value in param_arr
     norm = param_arr[np.argmin(np.abs(norm-param_arr))]
@@ -152,7 +154,10 @@ def vary_param(param_arr, param_name, time, cond, cond_names, norm, model = th_c
     
     df["ylog"] = np.log2(df["y"]/df["ynorm"])
     
-    pname = convert_name(param_name)
+    if convert == True:
+        pname = convert_name(param_name)
+    else: 
+        pname = param_name
     df["pname"] = pname
     
     return df
@@ -185,9 +190,11 @@ def get_relative_readouts(df):
     return df_base
 
 def multi_param(param_arrays, param_names, time, cond,
-                cond_names, norm_list, model = th_cell_diff, relative_readouts = False):
+                cond_names, norm_list, model = th_cell_diff, relative_readouts = False,
+                convert = True):
     
-    df_arr =[vary_param(param_arr, param_name, time, cond, cond_names, norm, model) for param_arr, param_name, norm in zip(param_arrays, param_names, norm_list)]
+    assert len(norm_list) == len(param_arrays) == len(param_names)
+    df_arr =[vary_param(param_arr, param_name, time, cond, cond_names, norm, model, convert_name) for param_arr, param_name, norm in zip(param_arrays, param_names, norm_list)]
     
     if (model == branch_precursor or model == branch_competetive) and relative_readouts == True:
         df_arr = [get_relative_readouts(df) for df in df_arr]
@@ -198,16 +205,56 @@ def multi_param(param_arrays, param_names, time, cond,
 
 
 def update_dict(d, val, name):
-    
     d = dict(d)
     d[name] = val
     
     return d
 
 def update_dicts(dicts, val, name):
+    
     dicts = [update_dict(dic, val, name) for dic in dicts]
     return dicts
 
+def norm_to_readout1(param_arr, param_name, time, cond, cond_names, norm, norm_cond, model = th_cell_diff,
+                    convert = True):
+    
+    df = vary_param(param_arr, param_name, time, cond, cond_names, norm, model,
+                    convert)   
+
+    df = df.loc[df["readout"] == "area", ["x", "y"]]  
+    df["crit"] = np.abs(norm_cond-df["y"])
+    df = df.reset_index()
+    min_idx = df["crit"].idxmin()
+
+    assert 0 < min_idx < df["crit"].size-1, "normalization not possible in given range"
+    crit_min = df["crit"].min()
+ 
+    out = float(df.loc[min_idx, ["x"]])
+    
+    return out, crit_min
+    
+def norm_to_readout(param_arr, param_name, time, cond, cond_names, norm, norm_cond = 1,
+                    model = th_cell_diff, convert = True, counter = 0):
+    
+    out, crit_min = norm_to_readout1(param_arr, param_name, time, cond, cond_names, norm,
+                                 norm_cond)
+    
+
+    if counter > 10:
+        return out
+    
+    elif crit_min > 0.001:
+        # counter is there to stop recursive function call if things go bad
+        counter = counter + 1
+        norm = out
+        sample_range = np.diff(param_arr)[0]
+        param_arr = np.linspace(out-1.1*sample_range, out+1.1*sample_range, 10)
+        
+        return norm_to_readout(param_arr, param_name, time, cond, cond_names, norm,
+                               counter = counter)
+    else:
+        return out
+    
 def get_tidy_readouts(p, param_name, time, cond, cond_names, model):
     cond = [update_dict(d, p, param_name) for d in cond]
     
@@ -246,6 +293,7 @@ def convert_name(name: str) -> str:
     """
     take input name and return as string that is nicer to read for plotting
     """
+
     d = {
         "beta" : r"$\beta$",
         "alpha" : r"$\alpha$",

@@ -6,7 +6,7 @@ Created on Mon Jan  6 10:24:11 2020
 @author: burt
 """
 
-from tcell_parameters import d_il2
+from tcell_parameters import d_il2_timer
 import sys
 sys.path.append("/home/burt/Documents/projects/2019/tcell_model/code/")
 import matplotlib.pyplot as plt
@@ -22,7 +22,7 @@ sns.set_palette(colors)
 # =============================================================================
 # define exp conditions
 # =============================================================================
-cond = [d_il2]
+cond = [d_il2_timer]
 cond_names = ["IL2"]
 time = np.arange(0, 6, 0.01)
 model = models.th_cell_diff
