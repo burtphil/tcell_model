@@ -12,8 +12,9 @@ import numpy as np
 from scipy.integrate import odeint
 import pandas as pd
 from module_models import th_cell_diff, branch_precursor, branch_competetive
-from module_readouts import get_area, get_decay, get_peaktime
+from module_readouts import get_area, get_decay, get_peaktime, get_peak
 from functools import partial
+import warnings
 # =============================================================================
 # 
 # =============================================================================
@@ -74,7 +75,7 @@ def run_model(time, d, model, initial_cells):
     return state
 
 def run_exp(time, cond, cond_names, model = th_cell_diff, initial_cells = 1,
-            keep_naive = False):
+            keep_naive = False, counter = 3, adjust_time = False):
     
     if model == th_cell_diff:
         cell_names = ["naive", "teff"]
@@ -86,8 +87,25 @@ def run_exp(time, cond, cond_names, model = th_cell_diff, initial_cells = 1,
     
     if keep_naive == False:
         df = df[df["cell"] != "naive"]
+    
+    if adjust_time == True:    
+        # check that time course returns to zero for diff. cells
+        # if not, increase time span and run again
+        last_el = df.value.iloc[-1]
         
-    return df 
+        if last_el < 0.01:
+            return df
+        elif counter > 3:
+            warnings.warn("no appropriate time frame found where cells return to zero")
+            return df   
+        else:
+            counter = counter + 1
+            time = np.arange(0, 5*time[-1],0.01)
+            return run_exp(time, cond, cond_names, model, initial_cells, keep_naive, counter,
+                           adjust_time)
+
+    else:
+        return df
 
 def df_from_exp(time, states, cond_names, cell_names):
     df_list = [sim_to_df(time, state, name, cell_names) for state, name in zip(states, cond_names)]
@@ -112,9 +130,10 @@ def generate_readouts(df, time):
     get_peaktime_partial = partial(get_peaktime, time)
     get_area_partial = partial(get_area, time)
     get_decay_partial = partial(get_decay, time)
+    get_peak_partial = partial(get_peak, time)
     
     df = df.groupby(groups).agg(
-            peak = ("value", max),
+            peak = ("value", get_peak_partial),
             tau = ("value", get_peaktime_partial),
             area = ("value", get_area_partial),
             decay = ("value", get_decay_partial),            
@@ -123,7 +142,7 @@ def generate_readouts(df, time):
     return df
 
 def vary_param(param_arr, param_name, time, cond, cond_names, norm, model = th_cell_diff,
-               convert = True):
+               convert = False, adjust_time = True):
     """
     vary parameter values get readouts for different conditions
     cond: list of parameter dictioniaries for each condition
@@ -134,7 +153,8 @@ def vary_param(param_arr, param_name, time, cond, cond_names, norm, model = th_c
     ! note that norm value needs to be in param_arr
     returns df with readouts for each cell and condition and parameter value
     """    
-    df_arr = [get_tidy_readouts(p, param_name, time, cond, cond_names, model) for p in param_arr]
+    df_arr = [get_tidy_readouts(p, param_name, time, cond, cond_names, model,
+                                adjust_time) for p in param_arr]
     df = pd.concat(df_arr)
 
     # get values for norm condition (all cell types all conditions all readouts) and merge to original data frame
@@ -189,12 +209,20 @@ def get_relative_readouts(df):
     
     return df_base
 
-def multi_param(param_arrays, param_names, time, cond,
-                cond_names, norm_list, model = th_cell_diff, relative_readouts = False,
-                convert = True):
+def multi_param(param_arrays, param_names, time, cond, cond_names, norm_list, 
+                model = th_cell_diff, relative_readouts = False, convert = False,
+                adjust_time = True):
     
     assert len(norm_list) == len(param_arrays) == len(param_names)
-    df_arr =[vary_param(param_arr, param_name, time, cond, cond_names, norm, model, convert_name) for param_arr, param_name, norm in zip(param_arrays, param_names, norm_list)]
+    df_arr =[vary_param(param_arr, 
+                        param_name, 
+                        time, 
+                        cond, 
+                        cond_names, 
+                        norm, 
+                        model, 
+                        convert,
+                        adjust_time) for param_arr, param_name, norm in zip(param_arrays, param_names, norm_list)]
     
     if (model == branch_precursor or model == branch_competetive) and relative_readouts == True:
         df_arr = [get_relative_readouts(df) for df in df_arr]
@@ -237,7 +265,7 @@ def norm_to_readout(param_arr, param_name, time, cond, cond_names, norm, norm_co
                     model = th_cell_diff, convert = True, counter = 0):
     
     out, crit_min = norm_to_readout1(param_arr, param_name, time, cond, cond_names, norm,
-                                 norm_cond)
+                                 norm_cond, model, convert)
     
 
     if counter > 10:
@@ -251,14 +279,14 @@ def norm_to_readout(param_arr, param_name, time, cond, cond_names, norm, norm_co
         param_arr = np.linspace(out-1.1*sample_range, out+1.1*sample_range, 10)
         
         return norm_to_readout(param_arr, param_name, time, cond, cond_names, norm,
-                               counter = counter)
+                               model, convert, counter)
     else:
         return out
     
-def get_tidy_readouts(p, param_name, time, cond, cond_names, model):
+def get_tidy_readouts(p, param_name, time, cond, cond_names, model, adjust_time):
     cond = [update_dict(d, p, param_name) for d in cond]
     
-    df = run_exp(time, cond, cond_names, model)
+    df = run_exp(time, cond, cond_names, model, adjust_time = adjust_time)
     df2 = generate_readouts(df, time)
     df2 = pd.melt(df2.reset_index(), 
                   id_vars = ["cond", "cell"],

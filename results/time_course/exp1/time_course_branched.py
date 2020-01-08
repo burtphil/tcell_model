@@ -4,9 +4,9 @@
 understand rate effect in IL2 model for this plot time course and vary Il2 params
 """
 
-from tcell_parameters import d_prec, d_prec_il7, d_prec_il2, d_prec_timer
 import sys
 sys.path.append("/home/burt/Documents/projects/2019/tcell_model/code/")
+from tcell_parameters import d_prec, d_prec_il7, d_prec_il2, d_prec_timer
 import matplotlib.pyplot as plt
 from test_module import run_exp
 import module_models as models

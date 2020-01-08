@@ -17,36 +17,44 @@ def th_cell_diff(th_state, time, d):
     """
     assert d["alpha_IL2"] < d["alpha"]
     
-    #tnaive = np.sum(th_state[:-(2*d["alpha_p"])])
+    tnaive = np.sum(th_state[:-(2*d["alpha_p"])])
     teff = np.sum(th_state[-(2*d["alpha_p"]):-d["alpha_p"]])
     # this is the beta sad IL2 population
-    tnoil2 = np.sum(th_state[-d["alpha_p"]:])
+    teff_noil2 = np.sum(th_state[-d["alpha_p"]:])
     
+    # old IL2 model
     # get IL2 producers (depending on alpha IL2)
-    t_il2 = np.sum(th_state[:d["alpha_IL2"]])
-    t_noil2 = np.sum(th_state)-t_il2
     
-    conc_il2 = d["rate_il2"]*t_il2/(d["K_il2"]+t_noil2)
+    il2_producers = tnaive+teff
+    il2_consumers = teff+teff_noil2   
+    
+    if d["mode"] == "il2_old":
+        il2_producers = np.sum(th_state[:d["alpha_IL2"]])
+        il2_consumers = np.sum(th_state)-il2_producers
 
-    #carrying capacity
-    il7_consumers = teff+tnoil2
-
+    conc_il2 = d["rate_il2"]*il2_producers/(d["K_il2"]+il2_consumers)
+    
+    il7_consumers = il2_consumers
+    conc_il7 = d["rate_il7"] / (d["K_il2"]+il7_consumers)
     # mm kinetic feedback implementation  
     fb_ifn = 0
     if d["fb_ifn"] != 0:
-        conc_ifn = d["rate_ifn"]*(teff+tnoil2)
+        conc_ifn = d["rate_ifn"]*(il2_producers)
         fb_ifn = (d["fb_ifn"]*conc_ifn**3)/(conc_ifn**3+d["K_ifn"]**3)
   
     beta = (fb_ifn+1)*d["beta"]
     
-    beta_p = d["beta_p"]
+    beta_p = d["beta_p"] 
+    if d["mode"] != "Null":      
+        beta_p = beta_p * (1 - (il7_consumers / (d["crit_space"]) ) )
+        
     rate_death = d["d_eff"]
 
     # check if crit has been updated from F to T, if not
     # check if crit should be updated, then store t0 time of update
     # if crit has been updated, update prolif rate
     if d["crit"] == False:
-        update_t0(d, time, conc_il2, il7_consumers)
+        update_t0(d, time, conc_il2, conc_il7)
     elif d["death_mode"] == False:
         beta_p = beta_p*np.exp(-d["decay_p"]*(time-d["t0"]))
     else:
@@ -57,12 +65,12 @@ def th_cell_diff(th_state, time, d):
  
     return dt_state
 
-def update_t0(d, time, conc_il2, il7_consumers):
+def update_t0(d, time, conc_il2, conc_il7):
 
     if d["mode"] in ["il7", "il2", "timer", "il2_timer", "il2+", "timer+"]:
         crit_time = time > d["crit_timer"]
         crit_il2 = conc_il2 < d["crit_il2"]
-        crit_il7 = il7_consumers > d["crit_il7"]
+        crit_il7 = conc_il7 < d["crit_il7"]
         
         c1 = d["mode"] == "timer" and crit_time
         # add time constraint because for time = 0 conc_il2 = 0
