@@ -101,6 +101,7 @@ def run_exp(time, cond, cond_names, model = th_cell_diff, initial_cells = 1,
         else:
             counter = counter + 1
             time = np.arange(0, 5*time[-1],0.01)
+            print("adjusting time frame for simulation...")
             return run_exp(time, cond, cond_names, model, initial_cells, keep_naive, counter,
                            adjust_time)
 
@@ -173,11 +174,14 @@ def vary_param(param_arr, param_name, time, cond, cond_names, norm, model = th_c
                    right_on = ["cond", "cell", "readout"])
     
     df["ylog"] = np.log2(df["y"]/df["ynorm"])
+    # add xnorm column to normalise x axis for param scans
+    df["xnorm"] = df["x"] / norm
     
     if convert == True:
         pname = convert_name(param_name)
     else: 
         pname = param_name
+        
     df["pname"] = pname
     
     return df
@@ -282,7 +286,8 @@ def norm_to_readout(param_arr, param_name, time, cond, cond_names, norm, norm_co
                                model, convert, counter)
     else:
         return out
-    
+
+  
 def get_tidy_readouts(p, param_name, time, cond, cond_names, model, adjust_time):
     cond = [update_dict(d, p, param_name) for d in cond]
     
@@ -295,7 +300,7 @@ def get_tidy_readouts(p, param_name, time, cond, cond_names, model, adjust_time)
                   value_name = "y")
     
     df2["x"] = p
-
+    
     return df2
 
 def f(x,y):
@@ -335,3 +340,16 @@ def convert_name(name: str) -> str:
     n = d[name]
     
     return n
+
+def array_from_dict(d, pname, res = 25, log = True):
+    """
+    takes dict, returns array for param scan
+    with default values of dict * or / 100%
+    """
+    x = d[pname]
+    xmin = x/10.
+    xmax = x*10.
+    arr1 = np.linspace(xmin, x, res, endpoint = False)
+    arr2 = np.linspace(x, xmax)
+    arr = np.concatenate((arr1, arr2))
+    return arr
