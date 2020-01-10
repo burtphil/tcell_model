@@ -341,8 +341,7 @@ def norm_readout(pname, pmin, pmax, time, cond, cond_names, model = th_cell_diff
         df = run_exp(time, cond, cond_names, model)
         read = generate_readouts(df, time)
         area = read.area[0]
-        print(area, guess, pmin, pmax)
-        
+       
         if area < norm_cond:
             pmin = guess
             guess = (guess+pmax)/2
@@ -354,8 +353,7 @@ def norm_readout(pname, pmin, pmax, time, cond, cond_names, model = th_cell_diff
         if np.abs(area-norm_cond) < 0.1:
             crit = True
             
-        print(area, guess, pmin, pmax)
-        
+      
     return guess
 
 
