@@ -248,71 +248,16 @@ def update_dicts(dicts, val, name):
     dicts = [update_dict(dic, val, name) for dic in dicts]
     return dicts
 
-def norm_to_readout1(param_arr, param_name, time, cond, cond_name, norm, norm_cond, model = th_cell_diff,
-                    convert = True):
-    # dummy list because vary param expects a list as input
-    cond = [cond]
-    cond_names = [cond_name]
-    
-    df = vary_param(param_arr, param_name, time, cond, cond_names, norm, model,
-                    convert)   
-
-    df = df.loc[df["readout"] == "area", ["x", "y"]]  
-    
-    df["crit"] = np.abs(norm_cond-df["y"])
-    df = df.reset_index()
-
-    min_idx = df["crit"].idxmin()
-
-    assert 0 < min_idx < df["crit"].size-1, "normalization not possible in given range"
-    crit_min = df["crit"].min()
- 
-    out = float(df.loc[min_idx, ["x"]])
-
-    return out, crit_min
-    
-def norm_to_readout(param_name, time, cond, cond_name, norm_cond = 1,
-                    model = th_cell_diff, convert = True, counter = 0, param_guess = 1.,
-                    sample_rate = 0.1):
+def norm_readout(pname, guess_range, time, cond, model = th_cell_diff,
+                 norm_cond = 2.):
     """
-    provide arr and parameter name
-    returns value of parameter name that
+    guess range should be a tuple of pmin pmax, 
+    cond is a dict with model params
+    pname is name of parameter to be normalized
+    norm cond: value of area to normalize against
     """
-
-    assert(param_guess > 0)
-    param_arr = np.linspace(0.1*param_guess, 10*param_guess, 20)
-    
-    if counter > 0:
-        sample_min = param_guess - 1.1*sample_rate
-        sample_max = param_guess + 1.1*sample_rate
-        
-        sample_min = sample_min if sample_min > 0 else 0
-        param_arr = np.linspace(sample_min, sample_max, 20)
-    
-   
-    norm = (param_arr[-1]+param_arr[0]) / 2
-
-    out, crit_min = norm_to_readout1(param_arr, param_name, time, cond, cond_name, norm,
-                                 norm_cond, model, convert)
-    
-    if counter > 5:
-        return out
-    
-    elif crit_min > 0.01:
-        
-        # counter is there to stop recursive function call if things go bad
-        counter = counter + 1
-        norm = out
-        param_guess = out
-        sample_rate = np.diff(param_arr)[0]
-        return norm_to_readout(param_name, time, cond, cond_name, norm_cond,
-                               model, convert, counter, param_guess, sample_rate)
-    else:
-        return out
-
-
-def norm_readout(pname, pmin, pmax, time, cond, cond_names, model = th_cell_diff,
-                 norm_cond = 2):
+    cond_names = ["dummy"]
+    pmin, pmax = guess_range
     
     cond = dict(cond)
     cond1 = dict(cond)
@@ -333,15 +278,18 @@ def norm_readout(pname, pmin, pmax, time, cond, cond_names, model = th_cell_diff
     assert area1 < norm_cond < area2
     guess = (pmin+pmax) / 2
     crit = False
-    
+    counter = 0
     while crit == False:
-
+        counter = counter + 1
+        if counter > 20:
+            break
         cond[0][pname] = guess
 
         df = run_exp(time, cond, cond_names, model)
         read = generate_readouts(df, time)
         area = read.area[0]
-       
+        #print("guess...area...pmin...pmax")
+        #print(guess, area, pmin, pmax)
         if area < norm_cond:
             pmin = guess
             guess = (guess+pmax)/2
@@ -350,10 +298,9 @@ def norm_readout(pname, pmin, pmax, time, cond, cond_names, model = th_cell_diff
             pmax = guess
             guess = (guess+pmin)/2
                       
-        if np.abs(area-norm_cond) < 0.1:
+        if np.abs(area-norm_cond) < 0.01:
             crit = True
             
-      
     return guess
 
 
