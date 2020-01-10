@@ -22,9 +22,9 @@ sns.set_palette(colors)
 # =============================================================================
 # define exp conditions
 # =============================================================================
-cond = [d_null]
-cond_names = ["Null"]
-d_il7["death_mode"] = True
+cond = [d_timer]
+cond_names = ["timer"]
+#d_il7["death_mode"] = True
 time = np.arange(0, 50, 0.01)
 model = models.th_cell_diff
 
@@ -35,4 +35,3 @@ sns.relplot(x = "time", y = "value", kind = "line", data = df)
 test = df.value
 
 readouts = generate_readouts(df, time)
-print(readouts)

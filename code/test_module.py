@@ -153,9 +153,10 @@ def vary_param(param_arr, param_name, time, cond, cond_names, norm, model = th_c
     norm: parameter value to normalize against
     ! note that norm value needs to be in param_arr
     returns df with readouts for each cell and condition and parameter value
-    """    
-    df_arr = [get_tidy_readouts(p, param_name, time, cond, cond_names, model,
-                                adjust_time) for p in param_arr]
+    """  
+    
+    df_arr = [get_tidy_readouts(p, param_name, time, cond, cond_names, model = model,
+                                adjust_time = adjust_time) for p in param_arr]
     df = pd.concat(df_arr)
 
     # get values for norm condition (all cell types all conditions all readouts) and merge to original data frame
@@ -247,48 +248,119 @@ def update_dicts(dicts, val, name):
     dicts = [update_dict(dic, val, name) for dic in dicts]
     return dicts
 
-def norm_to_readout1(param_arr, param_name, time, cond, cond_names, norm, norm_cond, model = th_cell_diff,
+def norm_to_readout1(param_arr, param_name, time, cond, cond_name, norm, norm_cond, model = th_cell_diff,
                     convert = True):
+    # dummy list because vary param expects a list as input
+    cond = [cond]
+    cond_names = [cond_name]
     
     df = vary_param(param_arr, param_name, time, cond, cond_names, norm, model,
                     convert)   
 
     df = df.loc[df["readout"] == "area", ["x", "y"]]  
+    
     df["crit"] = np.abs(norm_cond-df["y"])
     df = df.reset_index()
+
     min_idx = df["crit"].idxmin()
 
     assert 0 < min_idx < df["crit"].size-1, "normalization not possible in given range"
     crit_min = df["crit"].min()
  
     out = float(df.loc[min_idx, ["x"]])
-    
+
     return out, crit_min
     
-def norm_to_readout(param_arr, param_name, time, cond, cond_names, norm, norm_cond = 1,
-                    model = th_cell_diff, convert = True, counter = 0):
+def norm_to_readout(param_name, time, cond, cond_name, norm_cond = 1,
+                    model = th_cell_diff, convert = True, counter = 0, param_guess = 1.,
+                    sample_rate = 0.1):
+    """
+    provide arr and parameter name
+    returns value of parameter name that
+    """
+
+    assert(param_guess > 0)
+    param_arr = np.linspace(0.1*param_guess, 10*param_guess, 20)
     
-    out, crit_min = norm_to_readout1(param_arr, param_name, time, cond, cond_names, norm,
+    if counter > 0:
+        sample_min = param_guess - 1.1*sample_rate
+        sample_max = param_guess + 1.1*sample_rate
+        
+        sample_min = sample_min if sample_min > 0 else 0
+        param_arr = np.linspace(sample_min, sample_max, 20)
+    
+   
+    norm = (param_arr[-1]+param_arr[0]) / 2
+
+    out, crit_min = norm_to_readout1(param_arr, param_name, time, cond, cond_name, norm,
                                  norm_cond, model, convert)
     
-
-    if counter > 10:
+    if counter > 5:
         return out
     
-    elif crit_min > 0.001:
+    elif crit_min > 0.01:
+        
         # counter is there to stop recursive function call if things go bad
         counter = counter + 1
         norm = out
-        sample_range = np.diff(param_arr)[0]
-        param_arr = np.linspace(out-1.1*sample_range, out+1.1*sample_range, 10)
-        
-        return norm_to_readout(param_arr, param_name, time, cond, cond_names, norm,
-                               model, convert, counter)
+        param_guess = out
+        sample_rate = np.diff(param_arr)[0]
+        return norm_to_readout(param_name, time, cond, cond_name, norm_cond,
+                               model, convert, counter, param_guess, sample_rate)
     else:
         return out
 
-  
+
+def norm_readout(pname, pmin, pmax, time, cond, cond_names, model = th_cell_diff,
+                 norm_cond = 2):
+    
+    cond = dict(cond)
+    cond1 = dict(cond)
+    cond2 = dict(cond)
+    cond1[pname] = pmin
+    cond2[pname] = pmax
+    cond1 = [cond1]
+    cond2 = [cond2]
+    cond = [cond]
+
+    df1 = run_exp(time, cond1, cond_names, model)
+    df2 = run_exp(time, cond2, cond_names, model)
+    read1 = generate_readouts(df1, time)
+    read2 = generate_readouts(df2, time)
+    area1 = read1.area[0]
+    area2 = read2.area[0]
+    
+    assert area1 < norm_cond < area2
+    guess = (pmin+pmax) / 2
+    crit = False
+    
+    while crit == False:
+
+        cond[0][pname] = guess
+
+        df = run_exp(time, cond, cond_names, model)
+        read = generate_readouts(df, time)
+        area = read.area[0]
+        
+        if area < norm_cond:
+            guess = (guess+pmax)/2
+            pmin = guess
+        
+        else:
+            guess = (guess+pmin)/2
+            pmax = guess
+        
+        
+        if np.abs(area-norm_cond) < 0.1:
+            crit = True
+            
+        print(area, guess, pmin, pmax)
+        
+    return guess
+
+
 def get_tidy_readouts(p, param_name, time, cond, cond_names, model, adjust_time):
+
     cond = [update_dict(d, p, param_name) for d in cond]
     
     df = run_exp(time, cond, cond_names, model, adjust_time = adjust_time)
