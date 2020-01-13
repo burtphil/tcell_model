@@ -9,7 +9,8 @@ for this, betap should be in unstable range (set this in tcell params)
 """
 
 import sys
-sys.path.append("/home/burt/Documents/projects/2019/tcell_model/code/")
+#sys.path.append("/home/burt/Documents/projects/2019/tcell_model/code/")
+sys.path.append("C:/Users/Philipp/Documents/projects/tcell_model/code")
 from tcell_parameters import d_null, d_il7, d_il2, d_timer
 import matplotlib.pyplot as plt
 from test_module import multi_param, array_from_dict
@@ -26,9 +27,9 @@ sns.set(context = "poster", style = "ticks", rc = {"lines.linewidth": 4})
 # define exp conditions
 # =============================================================================
 
-cond = [d_il7, d_il2, d_timer]
+cond = [d_null, d_il7, d_il2, d_timer]
 
-cond_names = ["Carr. Cap.", "IL2", "Timer"]
+cond_names = ["Null", "Carr. Cap.", "IL2", "Timer"]
 
 time = np.arange(0,250,0.01)
 
@@ -55,6 +56,8 @@ g = sns.relplot(x = "xnorm", y = "ylog", kind = "line", data = df_new, hue = "co
                 facet_kws = {"margin_titles" : True, "sharex" : True, "sharey" : True},
                 legend = "full")
 
+ylim = (None, None)
+g.set(ylim = ylim, ylabel = "log2FC", xlabel = "param value (norm.)")
 for ax in g.axes.flat:
     ax.set_xscale("log")
     ax.xaxis.set_major_locator(loc_major)
@@ -62,7 +65,7 @@ for ax in g.axes.flat:
     
 [plt.setp(ax.texts, text="") for ax in g.axes.flat]
 g.set_titles(row_template = '{row_name}', col_template = '{col_name}')
-
+g.savefig("pscan1.pdf")
 # =============================================================================
 # same plot but now facet for readouts
 # =============================================================================
@@ -73,7 +76,7 @@ g = sns.relplot(x = "xnorm", y = "ylog", kind = "line", data = df_new, hue = "re
                 legend = "full")
 
 ylim = (None, None)
-g.set(ylim = ylim, ylabel = "log2FC")
+g.set(ylim = ylim, ylabel = "log2FC", xlabel = "param value (norm.)")
 for ax in g.axes.flat:
     ax.set_xscale("log")
     ax.xaxis.set_major_locator(loc_major)
@@ -81,5 +84,5 @@ for ax in g.axes.flat:
     
 [plt.setp(ax.texts, text="") for ax in g.axes.flat]
 g.set_titles(row_template = '{row_name}', col_template = '{col_name}')
-
+g.savefig("pscan2.pdf")
 

@@ -143,7 +143,7 @@ def generate_readouts(df, time):
     return df
 
 def vary_param(param_arr, param_name, time, cond, cond_names, norm, model = th_cell_diff,
-               convert = False, adjust_time = True):
+               convert = False, adjust_time = False):
     """
     vary parameter values get readouts for different conditions
     cond: list of parameter dictioniaries for each condition
@@ -216,7 +216,7 @@ def get_relative_readouts(df):
 
 def multi_param(param_arrays, param_names, time, cond, cond_names, norm_list, 
                 model = th_cell_diff, relative_readouts = False, convert = False,
-                adjust_time = True):
+                adjust_time = False):
     
     assert len(norm_list) == len(param_arrays) == len(param_names)
     df_arr =[vary_param(param_arr, 
@@ -249,7 +249,7 @@ def update_dicts(dicts, val, name):
     return dicts
 
 def norm_readout(pname, guess_range, time, cond, model = th_cell_diff,
-                 norm_cond = 2.):
+                 norm_cond = 4.):
     """
     guess range should be a tuple of pmin pmax, 
     cond is a dict with model params
@@ -274,14 +274,15 @@ def norm_readout(pname, guess_range, time, cond, model = th_cell_diff,
     read2 = generate_readouts(df2, time)
     area1 = read1.area[0]
     area2 = read2.area[0]
-    
+    #print(pname, cond, area1, area2)
     assert area1 < norm_cond < area2
     guess = (pmin+pmax) / 2
     crit = False
     counter = 0
     while crit == False:
         counter = counter + 1
-        if counter > 20:
+        if counter > 50:
+            print("stopping normalization")
             break
         cond[0][pname] = guess
 
@@ -298,7 +299,7 @@ def norm_readout(pname, guess_range, time, cond, model = th_cell_diff,
             pmax = guess
             guess = (guess+pmin)/2
                       
-        if np.abs(area-norm_cond) < 0.01:
+        if np.abs(area-norm_cond) < 0.005:
             crit = True
             
     return guess

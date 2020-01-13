@@ -7,8 +7,9 @@ Created on Tue Jan  7 15:13:46 2020
 """
 
 import sys
+#sys.path.append("/home/burt/Documents/projects/2019/tcell_model/code/")
 sys.path.append("C:/Users/Philipp/Documents/projects/tcell_model/code")
-from tcell_parameters import d_il2, d_timer, d_il2_timer
+from tcell_parameters import d_il2, d_timer, d_il2_timer, d_il7
 import matplotlib.pyplot as plt
 from test_module import norm_readout
 import module_models as models
@@ -20,15 +21,14 @@ sns.set(context = "poster", style = "ticks", rc = {"lines.linewidth": 4})
 colors = ["#3498db", "#95a5a6", "#e74c3c", "#34495e"]     
 sns.set_palette(colors)
 
-time = np.arange(0,50,0.01)
-pname = "crit_timer"
+time = np.arange(0,200,0.01)
+pname = "rate_il7"
 
-cond = d_timer
+cond = d_il7
 cond_names = ["timer"]
-
-#out = norm_readout(pname, pmin, pmax, time, cond, cond_names)
-#print(out)
-arr = np.arange(30.,40,1)
+guess_range = (0,5)
+out = norm_readout(pname, guess_range, time, cond)
+print(out)
 
 
 def fun(arr, pname, guess_arr, cond_list, cond_names):
@@ -60,9 +60,16 @@ def fun2(arr, pname, guess_range, time, cond, cond_name):
     
     return df
 
-guess_arr = [(0,5), (0,2)]
+arr = np.arange(30.,40,0.5)
+guess_arr = [(0,5), (0,1000), (0,5)]
 pname = "beta_p"
-cond_list = [d_timer, d_il2]
-cond_names = ["crit_timer","rate_il2"]      
+cond_list = [d_timer, d_il2, d_il7]
+cond_names = ["crit_timer","rate_il2", "rate_il7"]      
 
 df = fun(arr, pname, guess_arr, cond_list, cond_names)
+
+xlabel = r"$\beta_p$"
+ylabel = "log2FC"
+g = sns.relplot(x = "x", y = "ylog", data = df, hue = "model")
+g.set(xlabel = xlabel, ylabel = ylabel)
+g.savefig("norm_params.pdf")

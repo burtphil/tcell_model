@@ -9,8 +9,9 @@ this is to anaylze parameters of Null model, for this betap should be in stable 
 
 
 import sys
-sys.path.append("/home/burt/Documents/projects/2019/tcell_model/code/")
-from tcell_parameters import d_null
+#sys.path.append("/home/burt/Documents/projects/2019/tcell_model/code/")
+sys.path.append("C:/Users/Philipp/Documents/projects/tcell_model/code")
+from tcell_parameters import d_null, d_space
 import matplotlib.pyplot as plt
 from test_module import multi_param, array_from_dict
 import module_models as models
@@ -30,7 +31,7 @@ cond = [d_null]
 
 cond_names = ["Null Model"]
 
-time = np.arange(0,50,0.01)
+time = np.arange(0,20,0.01)
 
 model = models.th_cell_diff
 
@@ -43,7 +44,6 @@ param_arrays = [array_from_dict(d_null, pname) for pname in param_names]
 
 df_new = multi_param(param_arrays, param_names, time, cond,
                 cond_names, norm_list, model = model, adjust_time = False)
-
 
 # =============================================================================
 # same plot but now facet for readouts
@@ -62,3 +62,4 @@ for ax in g.axes.flat:
     
 [plt.setp(ax.texts, text="") for ax in g.axes.flat]
 g.set_titles(row_template = '{row_name}', col_template = '{col_name}')
+g.savefig("pscan_null.pdf")

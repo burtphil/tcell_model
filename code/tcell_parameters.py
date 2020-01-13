@@ -10,15 +10,15 @@ d_null = {
         "d_eff" : 1.5,
         "d_prec" : 0,
         "mode" : "Null",
-        "rate_il2" : 0,
-        "rate_il7" : 0,
+        "rate_il2" : 0.5078125,
+        "rate_il7" : 0.080645,
         "fb_il2" : 1.0,
         "rate_ifn" : 1.0,
         "K_ifn" : 1.0,
         "fb_ifn" : 0,
         "crit" : False,
         "crit_space" : 13000,
-        "crit_timer" : 2,
+        "crit_timer" : 1.27,
         "crit_il7" : 0.1,
         "crit_il2" : 0.1,
         "t0" : None,
@@ -27,6 +27,9 @@ d_null = {
         "death_mode" : False,
         "K_il2": 0.0001
         }
+
+d_space = dict(d_null)
+d_space["mode"] = "space"
 
 d_il7 = dict(d_null)
 d_il7["mode"] = "il7"

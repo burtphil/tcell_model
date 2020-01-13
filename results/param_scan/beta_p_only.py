@@ -9,7 +9,9 @@ this should be run to analyze dynamic range of carrying capacity model
 """
 
 import sys
-sys.path.append("/home/burt/Documents/projects/2019/tcell_model/code/")
+#sys.path.append("/home/burt/Documents/projects/2019/tcell_model/code/")
+sys.path.append("C:/Users/Philipp/Documents/projects/tcell_model/code")
+
 from tcell_parameters import d_null, d_il7, d_il2, d_timer
 import matplotlib.pyplot as plt
 from test_module import multi_param, array_from_dict
