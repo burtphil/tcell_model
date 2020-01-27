@@ -1,0 +1,482 @@
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2015/dev/Debian) (preloaded format=pdflatex 2018.9.22)  24 JAN 2020 12:52
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**all_figures.tex
+(./all_figures.tex
+LaTeX2e <2014/05/01>
+Babel <3.9l> and hyphenation patterns for 79 languages loaded.
+(/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2014/09/29 v1.4h Standard LaTeX document class
+(/usr/share/texlive/texmf-dist/tex/latex/base/size12.clo
+File: size12.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+(/usr/share/texlive/texmf-dist/tex/latex/base/inputenc.sty
+Package: inputenc 2014/04/30 v1.2b Input encoding file
+\inpenc@prehook=\toks14
+\inpenc@posthook=\toks15
+
+(/usr/share/texlive/texmf-dist/tex/latex/base/latin1.def
+File: latin1.def 2014/04/30 v1.2b Input encoding file
+))
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsmath.sty
+Package: amsmath 2013/01/14 v2.14 AMS math features
+\@mathmargin=\skip43
+
+For additional information on amsmath, use the `?' option.
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amstext.sty
+Package: amstext 2000/06/29 v2.01
+
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsgen.sty
+File: amsgen.sty 1999/11/30 v2.0
+\@emptytoks=\toks16
+\ex@=\dimen103
+))
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsbsy.sty
+Package: amsbsy 1999/11/29 v1.2d
+\pmbraise@=\dimen104
+)
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsopn.sty
+Package: amsopn 1999/12/14 v2.01 operator names
+)
+\inf@bad=\count87
+LaTeX Info: Redefining \frac on input line 210.
+\uproot@=\count88
+\leftroot@=\count89
+LaTeX Info: Redefining \overline on input line 306.
+\classnum@=\count90
+\DOTSCASE@=\count91
+LaTeX Info: Redefining \ldots on input line 378.
+LaTeX Info: Redefining \dots on input line 381.
+LaTeX Info: Redefining \cdots on input line 466.
+\Mathstrutbox@=\box26
+\strutbox@=\box27
+\big@size=\dimen105
+LaTeX Font Info:    Redeclaring font encoding OML on input line 566.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 567.
+\macc@depth=\count92
+\c@MaxMatrixCols=\count93
+\dotsspace@=\muskip10
+\c@parentequation=\count94
+\dspbrk@lvl=\count95
+\tag@help=\toks17
+\row@=\count96
+\column@=\count97
+\maxfields@=\count98
+\andhelp@=\toks18
+\eqnshift@=\dimen106
+\alignsep@=\dimen107
+\tagshift@=\dimen108
+\tagwidth@=\dimen109
+\totwidth@=\dimen110
+\lineht@=\dimen111
+\@envbody=\toks19
+\multlinegap=\skip44
+\multlinetaggap=\skip45
+\mathdisplay@stack=\toks20
+LaTeX Info: Redefining \[ on input line 2665.
+LaTeX Info: Redefining \] on input line 2666.
+)
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amsfonts.sty
+Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
+\symAMSa=\mathgroup4
+\symAMSb=\mathgroup5
+LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
+(Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
+)
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amssymb.sty
+Package: amssymb 2013/01/14 v3.01 AMS font symbols
+)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 2014/04/25 v1.0g Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/keyval.sty
+Package: keyval 2014/05/08 v1.15 key=value parser (DPC)
+\KV@toks@=\toks21
+)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2009/02/05 v1.0o Standard LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/trig.sty
+Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
+)
+(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/graphics.cfg
+File: graphics.cfg 2010/04/23 v1.9 graphics configuration of TeX Live
+)
+Package graphics Info: Driver file: pdftex.def on input line 91.
+
+(/usr/share/texlive/texmf-dist/tex/latex/pdftex-def/pdftex.def
+File: pdftex.def 2011/05/27 v0.06d Graphics/color for pdfTeX
+
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/infwarerr.sty
+Package: infwarerr 2010/04/08 v1.3 Providing info/warning/error messages (HO)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/ltxcmds.sty
+Package: ltxcmds 2011/11/09 v1.22 LaTeX kernel commands for general use (HO)
+)
+\Gread@gobject=\count99
+))
+\Gin@req@height=\dimen112
+\Gin@req@width=\dimen113
+)
+(/usr/share/texlive/texmf-dist/tex/latex/geometry/geometry.sty
+Package: geometry 2010/09/12 v5.6 Page Geometry
+
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/ifpdf.sty
+Package: ifpdf 2011/01/30 v2.3 Provides the ifpdf switch (HO)
+Package ifpdf Info: pdfTeX in PDF mode is detected.
+)
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/ifvtex.sty
+Package: ifvtex 2010/03/01 v1.5 Detect VTeX and its facilities (HO)
+Package ifvtex Info: VTeX not detected.
+)
+(/usr/share/texlive/texmf-dist/tex/generic/ifxetex/ifxetex.sty
+Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
+)
+\Gm@cnth=\count100
+\Gm@cntv=\count101
+\c@Gm@tempcnt=\count102
+\Gm@bindingoffset=\dimen114
+\Gm@wd@mp=\dimen115
+\Gm@odd@mp=\dimen116
+\Gm@even@mp=\dimen117
+\Gm@layoutwidth=\dimen118
+\Gm@layoutheight=\dimen119
+\Gm@layouthoffset=\dimen120
+\Gm@layoutvoffset=\dimen121
+\Gm@dimlist=\toks22
+)
+(./all_figures.aux)
+\openout1 = `all_figures.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 9.
+LaTeX Font Info:    ... okay on input line 9.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 9.
+LaTeX Font Info:    ... okay on input line 9.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 9.
+LaTeX Font Info:    ... okay on input line 9.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 9.
+LaTeX Font Info:    ... okay on input line 9.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 9.
+LaTeX Font Info:    ... okay on input line 9.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 9.
+LaTeX Font Info:    ... okay on input line 9.
+
+(/usr/share/texlive/texmf-dist/tex/context/base/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count103
+\scratchdimen=\dimen122
+\scratchbox=\box28
+\nofMPsegments=\count104
+\nofMParguments=\count105
+\everyMPshowfont=\toks23
+\MPscratchCnt=\count106
+\MPscratchDim=\dimen123
+\MPnumerator=\count107
+\makeMPintoPDFobject=\count108
+\everyMPtoPDFconversion=\toks24
+) (/usr/share/texlive/texmf-dist/tex/generic/oberdiek/pdftexcmds.sty
+Package: pdftexcmds 2011/11/29 v0.20 Utility functions of pdfTeX for LuaTeX (HO
+)
+
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/ifluatex.sty
+Package: ifluatex 2010/03/01 v1.3 Provides the ifluatex switch (HO)
+Package ifluatex Info: LuaTeX not detected.
+)
+Package pdftexcmds Info: LuaTeX not detected.
+Package pdftexcmds Info: \pdf@primitive is available.
+Package pdftexcmds Info: \pdf@ifprimitive is available.
+Package pdftexcmds Info: \pdfdraftmode found.
+)
+(/usr/share/texlive/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
+Package: epstopdf-base 2010/02/09 v2.5 Base part for package epstopdf
+
+(/usr/share/texlive/texmf-dist/tex/latex/oberdiek/grfext.sty
+Package: grfext 2010/08/19 v1.1 Manage graphics extensions (HO)
+
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/kvdefinekeys.sty
+Package: kvdefinekeys 2011/04/07 v1.3 Define keys (HO)
+))
+(/usr/share/texlive/texmf-dist/tex/latex/oberdiek/kvoptions.sty
+Package: kvoptions 2011/06/30 v3.11 Key value format for package options (HO)
+
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/kvsetkeys.sty
+Package: kvsetkeys 2012/04/25 v1.16 Key value parser (HO)
+
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/etexcmds.sty
+Package: etexcmds 2011/02/16 v1.5 Avoid name clashes with e-TeX commands (HO)
+Package etexcmds Info: Could not find \expanded.
+(etexcmds)             That can mean that you are not using pdfTeX 1.50 or
+(etexcmds)             that some package has redefined \expanded.
+(etexcmds)             In the latter case, load this package earlier.
+)))
+Package grfext Info: Graphics extension search list:
+(grfext)             [.png,.pdf,.jpg,.mps,.jpeg,.jbig2,.jb2,.PNG,.PDF,.JPG,.JPE
+G,.JBIG2,.JB2,.eps]
+(grfext)             \AppendGraphicsExtensions on input line 452.
+
+(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
+File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
+e
+))
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+*geometry* verbose mode - [ preamble ] result:
+* driver: pdftex
+* paper: a4paper
+* layout: <same size as paper>
+* layoutoffset:(h,v)=(0.0pt,0.0pt)
+* modes: 
+* h-part:(L,W,R)=(42.67912pt, 497.92325pt, 56.9055pt)
+* v-part:(T,H,B)=(56.9055pt, 731.23584pt, 56.9055pt)
+* \paperwidth=597.50787pt
+* \paperheight=845.04684pt
+* \textwidth=497.92325pt
+* \textheight=731.23584pt
+* \oddsidemargin=-29.59087pt
+* \evensidemargin=-29.59087pt
+* \topmargin=-52.36449pt
+* \headheight=12.0pt
+* \headsep=25.0pt
+* \topskip=12.0pt
+* \footskip=30.0pt
+* \marginparwidth=35.0pt
+* \marginparsep=10.0pt
+* \columnsep=10.0pt
+* \skip\footins=10.8pt plus 4.0pt minus 2.0pt
+* \hoffset=0.0pt
+* \voffset=0.0pt
+* \mag=1000
+* \@twocolumnfalse
+* \@twosidefalse
+* \@mparswitchfalse
+* \@reversemarginfalse
+* (1in=72.27pt=25.4mm, 1cm=28.453pt)
+
+LaTeX Font Info:    Try loading font information for U+msa on input line 11.
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+LaTeX Font Info:    Try loading font information for U+msb on input line 11.
+
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+)
+<timecourse/prolif_tc_n_div_log.pdf, id=1, 996.58119pt x 336.84093pt>
+File: timecourse/prolif_tc_n_div_log.pdf Graphic file (type pdf)
+
+<use timecourse/prolif_tc_n_div_log.pdf>
+Package pdftex.def Info: timecourse/prolif_tc_n_div_log.pdf used on input line 
+21.
+(pdftex.def)             Requested size: 497.92325pt x 168.29668pt.
+
+<timecourse/prolif_tc_r_diff_log.pdf, id=2, 1014.3915pt x 336.84093pt>
+File: timecourse/prolif_tc_r_diff_log.pdf Graphic file (type pdf)
+
+<use timecourse/prolif_tc_r_diff_log.pdf>
+Package pdftex.def Info: timecourse/prolif_tc_r_diff_log.pdf used on input line
+ 22.
+(pdftex.def)             Requested size: 497.92325pt x 165.34131pt.
+
+<timecourse/prolif_gamma_log.pdf, id=3, 1009.91225pt x 336.84093pt>
+File: timecourse/prolif_gamma_log.pdf Graphic file (type pdf)
+
+<use timecourse/prolif_gamma_log.pdf>
+Package pdftex.def Info: timecourse/prolif_gamma_log.pdf used on input line 23.
+
+(pdftex.def)             Requested size: 497.92325pt x 166.07117pt.
+ [1
+
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map} <./timecourse/prolif_tc_n_d
+iv_log.pdf> <./timecourse/prolif_tc_r_diff_log.pdf
+
+pdfTeX warning: pdflatex (file ./timecourse/prolif_tc_r_diff_log.pdf): PDF incl
+usion: multiple pdfs with page group included in a single page
+>] [2 <./timecourse/prolif_gamma_log.pdf>]
+<pscans/scan_log2.pdf, id=118, 1194.56812pt x 1054.62685pt>
+File: pscans/scan_log2.pdf Graphic file (type pdf)
+
+<use pscans/scan_log2.pdf>
+Package pdftex.def Info: pscans/scan_log2.pdf used on input line 28.
+(pdftex.def)             Requested size: 497.92325pt x 439.59306pt.
+
+<pscans/pscan_specific.pdf, id=119, 1196.06995pt x 792.40108pt>
+File: pscans/pscan_specific.pdf Graphic file (type pdf)
+
+<use pscans/pscan_specific.pdf>
+Package pdftex.def Info: pscans/pscan_specific.pdf used on input line 31.
+(pdftex.def)             Requested size: 497.92325pt x 329.86806pt.
+
+<pscans/area_model_specific.pdf, id=120, 435.37479pt x 337.20164pt>
+File: pscans/area_model_specific.pdf Graphic file (type pdf)
+
+<use pscans/area_model_specific.pdf>
+Package pdftex.def Info: pscans/area_model_specific.pdf used on input line 33.
+(pdftex.def)             Requested size: 248.96162pt x 192.82436pt.
+ [3 <./pscans/scan_log2.pdf>]
+<heatmaps/heatmaps_area.pdf, id=235, 1011.78pt x 722.7pt>
+File: heatmaps/heatmaps_area.pdf Graphic file (type pdf)
+
+<use heatmaps/heatmaps_area.pdf>
+Package pdftex.def Info: heatmaps/heatmaps_area.pdf used on input line 37.
+(pdftex.def)             Requested size: 497.92325pt x 355.65892pt.
+ [4 <./pscans/pscan_specific.pdf> <./pscans/area_model_specific.pdf
+
+pdfTeX warning: pdflatex (file ./pscans/area_model_specific.pdf): PDF inclusion
+: multiple pdfs with page group included in a single page
+>] [5 <./heatmaps/heatmaps_area.pdf>]
+<heatmaps/heatmaps_tau.pdf, id=429, 1011.78pt x 722.7pt>
+File: heatmaps/heatmaps_tau.pdf Graphic file (type pdf)
+
+<use heatmaps/heatmaps_tau.pdf>
+Package pdftex.def Info: heatmaps/heatmaps_tau.pdf used on input line 42.
+(pdftex.def)             Requested size: 497.92325pt x 355.65892pt.
+ [6 <./heatmaps/heatmaps_tau.pdf>]
+<heatmaps/heatmaps_timer_il2.pdf, id=508, 1011.78pt x 289.08pt>
+File: heatmaps/heatmaps_timer_il2.pdf Graphic file (type pdf)
+
+<use heatmaps/heatmaps_timer_il2.pdf>
+Package pdftex.def Info: heatmaps/heatmaps_timer_il2.pdf used on input line 47.
+
+(pdftex.def)             Requested size: 497.92325pt x 142.26357pt.
+
+<heatmaps/heatmaps_timer_il2_combined.pdf, id=509, 1011.78pt x 289.08pt>
+File: heatmaps/heatmaps_timer_il2_combined.pdf Graphic file (type pdf)
+
+<use heatmaps/heatmaps_timer_il2_combined.pdf>
+Package pdftex.def Info: heatmaps/heatmaps_timer_il2_combined.pdf used on input
+ line 54.
+(pdftex.def)             Requested size: 497.92325pt x 142.26357pt.
+ [7 <./heatmaps/heatmaps_timer_il2.pdf> <./heatmaps/heatmaps_timer_il2_combined
+.pdf
+
+pdfTeX warning: pdflatex (file ./heatmaps/heatmaps_timer_il2_combined.pdf): PDF
+ inclusion: multiple pdfs with page group included in a single page
+>] <heatmaps/model_spec_heatmaps.pdf, id=601, 1011.78pt x 722.7pt>
+File: heatmaps/model_spec_heatmaps.pdf Graphic file (type pdf)
+
+<use heatmaps/model_spec_heatmaps.pdf>
+Package pdftex.def Info: heatmaps/model_spec_heatmaps.pdf used on input line 59
+.
+(pdftex.def)             Requested size: 497.92325pt x 355.65892pt.
+
+<normalization/normalized_params.pdf, id=602, 1011.78pt x 289.08pt>
+File: normalization/normalized_params.pdf Graphic file (type pdf)
+
+<use normalization/normalized_params.pdf>
+Package pdftex.def Info: normalization/normalized_params.pdf used on input line
+ 61.
+(pdftex.def)             Requested size: 497.92325pt x 142.26357pt.
+ [8 <./heatmaps/model_spec_heatmaps.pdf> <./normalization/normalized_params.pdf
+
+
+pdfTeX warning: pdflatex (file ./normalization/normalized_params.pdf): PDF incl
+usion: multiple pdfs with page group included in a single page
+>] <menten_figures/tc_n_div.pdf, id=718, 1005.93492pt x 336.84093pt>
+File: menten_figures/tc_n_div.pdf Graphic file (type pdf)
+
+<use menten_figures/tc_n_div.pdf>
+Package pdftex.def Info: menten_figures/tc_n_div.pdf used on input line 66.
+(pdftex.def)             Requested size: 497.92325pt x 166.73419pt.
+
+<menten_figures/tc_r_diff.pdf, id=719, 1014.89337pt x 336.84093pt>
+File: menten_figures/tc_r_diff.pdf Graphic file (type pdf)
+
+<use menten_figures/tc_r_diff.pdf>
+Package pdftex.def Info: menten_figures/tc_r_diff.pdf used on input line 67.
+(pdftex.def)             Requested size: 497.92325pt x 165.25908pt.
+
+<menten_figures/tc_r_p.pdf, id=720, 985.78462pt x 336.84093pt>
+File: menten_figures/tc_r_p.pdf Graphic file (type pdf)
+
+<use menten_figures/tc_r_p.pdf>
+Package pdftex.def Info: menten_figures/tc_r_p.pdf used on input line 68.
+(pdftex.def)             Requested size: 497.92325pt x 170.13672pt.
+ [9 <./menten_figures/tc_n_div.pdf> <./menten_figures/tc_r_diff.pdf
+
+pdfTeX warning: pdflatex (file ./menten_figures/tc_r_diff.pdf): PDF inclusion: 
+multiple pdfs with page group included in a single page
+> <./menten_figures/tc_r_p.pdf
+
+pdfTeX warning: pdflatex (file ./menten_figures/tc_r_p.pdf): PDF inclusion: mul
+tiple pdfs with page group included in a single page
+>] <menten_figures/scan_log.pdf, id=818, 1194.57289pt x 693.53917pt>
+File: menten_figures/scan_log.pdf Graphic file (type pdf)
+
+<use menten_figures/scan_log.pdf>
+Package pdftex.def Info: menten_figures/scan_log.pdf used on input line 71.
+(pdftex.def)             Requested size: 497.92325pt x 289.08328pt.
+
+<menten_figures/pscan_specific.pdf, id=819, 1189.32233pt x 337.37416pt>
+File: menten_figures/pscan_specific.pdf Graphic file (type pdf)
+
+<use menten_figures/pscan_specific.pdf>
+Package pdftex.def Info: menten_figures/pscan_specific.pdf used on input line 7
+3.
+(pdftex.def)             Requested size: 497.92325pt x 141.24316pt.
+
+<menten_figures/heatmaps_area.pdf, id=820, 722.7pt x 289.08pt>
+File: menten_figures/heatmaps_area.pdf Graphic file (type pdf)
+
+<use menten_figures/heatmaps_area.pdf>
+Package pdftex.def Info: menten_figures/heatmaps_area.pdf used on input line 75
+.
+(pdftex.def)             Requested size: 497.92325pt x 199.16986pt.
+ [10 <./menten_figures/scan_log.pdf> <./menten_figures/pscan_specific.pdf
+
+pdfTeX warning: pdflatex (file ./menten_figures/pscan_specific.pdf): PDF inclus
+ion: multiple pdfs with page group included in a single page
+>] <menten_figures/area_model_specific.pdf, id=891, 435.37479pt x 337.20164pt>
+File: menten_figures/area_model_specific.pdf Graphic file (type pdf)
+
+<use menten_figures/area_model_specific.pdf>
+Package pdftex.def Info: menten_figures/area_model_specific.pdf used on input l
+ine 77.
+(pdftex.def)             Requested size: 248.96162pt x 192.82436pt.
+ [11 <./menten_figures/heatmaps_area.pdf> <./menten_figures/area_model_specific
+.pdf
+
+pdfTeX warning: pdflatex (file ./menten_figures/area_model_specific.pdf): PDF i
+nclusion: multiple pdfs with page group included in a single page
+>] [12] <pscans/scan_log_high.pdf, id=968, 1194.74542pt x 1054.65392pt>
+File: pscans/scan_log_high.pdf Graphic file (type pdf)
+
+<use pscans/scan_log_high.pdf>
+Package pdftex.def Info: pscans/scan_log_high.pdf used on input line 139.
+(pdftex.def)             Requested size: 497.92325pt x 439.53996pt.
+ [13] [14 <./pscans/scan_log_high.pdf>]
+(./all_figures.aux) ) 
+Here is how much of TeX's memory you used:
+ 2990 strings out of 493105
+ 42012 string characters out of 6137072
+ 110660 words of memory out of 5000000
+ 6394 multiletter control sequences out of 15000+600000
+ 9496 words of font info for 36 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 38i,16n,24p,1542b,202s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts
+/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
+ex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.p
+fb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></us
+r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share
+/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive
+/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb>
+Output written on all_figures.pdf (14 pages, 919288 bytes).
+PDF statistics:
+ 1038 PDF objects out of 1200 (max. 8388607)
+ 369 compressed objects within 4 object streams
+ 0 named destinations out of 1000 (max. 500000)
+ 101 words of extra memory for PDF output out of 10000 (max. 10000000)
+

@@ -1,0 +1,140 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[latin1]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage[left=1.50cm, right=2.00cm, top=2.00cm, bottom=2.00cm]{geometry}
+
+\begin{document}
+\section*{Model summary}
+\begin{align*}
+\frac{dX}{dt} &= -\beta_x \cdot X\\
+\frac{dY}{dt} &= \beta_x \cdot (n_{\text{div}} \cdot X -  Y) \\
+\frac{dZ}{dt} &= \beta_x \cdot n_{\text{div}} \cdot Y + \gamma(c_i) \cdot Z \quad i = [\text{IL2}, \text{MYC}, \text{C}]
+\end{align*}
+
+Where $\beta_x$ is the differentiation rate, $n_\text{div}$ is the number of divisions between state changes and $\gamma$ is the turnover rate of differentiated cells Z. The turnover rate $\gamma$ depends on the concentration $c_i$ of either IL2, MYC or C. I implemented two versions how the regulators IL2, MYC or C affect $\gamma$. One, where $\gamma$ declines irreversibly if a given regulator concentration $c_i$ is reached and a one where $\gamma$ is continuously modulated (michaelis-menten-like regulation). Both model versions give similar results. For a detailed model description as well as a discussion, see ...
+
+\section*{T cell homeostasis models exhibit qualitatively different behavior}
+All models are normalized to the same response size for common parameters (r diff, ndiv, gamma) set to 1. \\
+\includegraphics[width = \textwidth]{timecourse/prolif_tc_n_div_log.pdf}
+\includegraphics[width = \textwidth]{timecourse/prolif_tc_r_diff_log.pdf}
+\includegraphics[width = \textwidth]{timecourse/prolif_gamma_log.pdf}
+\newpage
+
+\section*{Quantification time course plots}
+Shown are readouts for different parameter values and models. The parameter variation corresponds to the time course simulations shown previously.\\
+\includegraphics[width = \textwidth]{pscans/scan_log2.pdf}
+
+\section*{Quantification of model specific parameters}
+\includegraphics[width = \textwidth]{pscans/pscan_specific.pdf}
+One can see that changes in the myc degradation rate have a huge effect compared with the parameters that are specific to the IL2 and carrying capacity model.\\
+\includegraphics[width = .5\textwidth]{pscans/area_model_specific.pdf}\\
+If I plot model specific parameters on the same axis, one can also see that the timer model is the most sensitive to parameter perturbations (yaxis: log2FC response size).
+\section*{Analysis of parameter interactions on readouts}
+\subsection*{Effect of parameter interactions on response size}
+\includegraphics[width = \textwidth]{heatmaps/heatmaps_area.pdf}
+The heatmaps above show that over a broad range of parameter combinations, the effects seen in the time course simulations are unique to the specific model. For example, the carrying capacity has quite robust response sizes but not response times. The differentiation rate has opposite effects on the response size in the IL2 and Timer model. Moreover, response times in the Timer model mostly depend on the model specific degradation rate of MYC.
+\newpage
+
+\subsection*{Effect of parameter interactions on response time (tau)}
+\includegraphics[width = \textwidth]{heatmaps/heatmaps_tau.pdf}
+\newpage
+
+\section*{Combination of timer and il2 model}
+If IL2 and timer model are combined one can see that the system switches between different modes of control. For high degradation rates of MYC, the timer behavior dominates the proliferation control, for lower degradation rates, the IL2 production rate changes the model behavior, but the sensitivity is lower than for the MYC degradation rate.\\
+\includegraphics[width = \textwidth]{heatmaps/heatmaps_timer_il2.pdf}\\
+I also looked at a model where the degradation rate of myc is modulated by the IL2 concentration:
+\begin{align*}
+\frac{d\text{MYC}}{dt} &= -r_\text{MYC}(\text{IL2}) \cdot \text{MYC} \\
+r_\text{MYC}(\text{IL2}) &= \frac{\widetilde{r}_\text{MYC}}{K_\text{IL2}+c_\text{IL2}}
+\end{align*}
+In this scenario, there is no switch in the model behavior but the model outputs are mainly regulated by $r_\text{MYC}$.\\
+\includegraphics[width = \textwidth]{heatmaps/heatmaps_timer_il2_combined.pdf}
+\newpage
+
+\section*{Normalization to resp. size}
+Initially, I had planned to vary model specific parameters and test in how far I have to vary other model parameters to obtain the same response size. This proves to be not so easy. The easiest approximation is to look at the heatmaps of model specific vs shared model parameters. The white area represents the value that comes closest to a normalization.\\
+\includegraphics[width = \textwidth]{heatmaps/model_spec_heatmaps.pdf}
+Taking the minima (approximating the whitest area!) of the above heatmap per column gives the parameter value for which I am closest to keeping the response size constant:\\
+\includegraphics[width = \textwidth]{normalization/normalized_params.pdf}
+Here, the x axis represents changed in model specific parameters (r myc, r IL2, r C) vs the change in the model parameter displayed on the y axis. Different models are indicated by color. One can see that the timer model is more sensitive to parameter variations.
+\newpage
+\section*{Comparison with michaelis-menten-like implementation}
+To test whether observed effects were due to a specific model design a also implemented a michaelis-menten-like version of the models. For parameters n div and r diff the effects are very similar. Also the effect of model specific parameters (timer model is most sensitive) is the same.\\
+\includegraphics[width = \textwidth]{menten_figures/tc_n_div.pdf}
+\includegraphics[width = \textwidth]{menten_figures/tc_r_diff.pdf}
+\includegraphics[width = \textwidth]{menten_figures/tc_r_p.pdf}
+\newpage
+\subsection*{Shared model parameters}
+\includegraphics[width = \textwidth]{menten_figures/scan_log.pdf}
+\subsection*{Model specific parameters}
+\includegraphics[width = \textwidth]{menten_figures/pscan_specific.pdf}
+\subsection*{Parameter interactions}
+\includegraphics[width = \textwidth]{menten_figures/heatmaps_area.pdf}
+\subsection*{Sensitivity to model specific parameters}
+\includegraphics[width = .5\textwidth]{menten_figures/area_model_specific.pdf}
+
+\section*{Next steps and open questions}
+do parameter variations matter? what can I learn from this? How can my results be compared with actual data? Does ndiv represent an activation rate? Because this is changed in experiments through different antigenic or CD28 stimulation. 
+
+Is proliferation coupled to differentiation? If not, do the models make sense?
+
+Would it make sense to go deeper into the homeostasis models? e.g. maybe use realistic parameter values for proliferation and differentiation? could model specific parameters be estimated?
+
+how do I use the results to continue with branching processes?
+do I actually need this to study decision making of branching cells and if yes, which contraction model is most appropriate? maybe if I only look at initial priming it does not even matter what happens during contraction? However, if I view the branching as a competition process (both for external resources and for IL2) it might play a role! Actually, CD8 cells cycle faster than CD4 cells and have a longer contraction phase. However, Prlic paper says its not a competition. Prlic paper says its not a competition for CD8 cells but who knows for Tfh and Th1? From an immunological outcome perspective of course it matters when and how many cells are cleared during an infection. I just wonder if it matters for the decision making in the early phase of the infection. This might also depend on the time frames of decision making vs differentiation which is not entirely clear even though my feeling is that decision making is fast compared to differentiation.
+
+modulation versus threshold model:
+good thing: similar results
+Both models can be justified. The irreversible process assumes that a signal cascade is triggered that eventually leads to cell death (or loss of proliferation or both, the turnover rate model does not distinguish these processes). It goes in line with the theory that cells integrate signals from TCR stimulation and cytokines that they receive at the time of activation and this determines the division destiny. However, even CD4 T cells with identical TCRs show large interclonal variations in proliferation so stochasticity also plays a role. It is also known that anti-apoptotic regulator BCL2 overexpression delays death and BCL2 deficiency reduces survival in activated T cells (even though more strongly in naive T cells). Moreover, IL2 given during contraction phase to CD8 cells can prolong contraction arguing for a continuous modulation of proliferation and death. Activation induced cell death might play a role in cases where antigen is not depleted from the system such as in autoimmunity or chronic inflammation. In some studies, it was found that the death rate of activated cells is close. There, the death rate was measured directly so the authors argue that mainly proliferation is regulated. In other studies where manipulation of apoptotic regulators affects the T cell response, authors argue that apoptosis is a major regulator of contraction. The models are not mutually exclusive. For example, IL2 could modulate the degradation rate of MYC which can induce an irreversible contraction of $\gamma$:
+
+role of IL2: alton bonnet: population effects
+
+\section*{Appendix}
+\subsection*{Detailed model description}
+\begin{align*}
+\frac{dX}{dt} &= -\beta_x \cdot X\\
+\frac{dY}{dt} &= n_{\text{div}} \cdot \beta_x \cdot X - \beta_x \cdot Y \\
+\frac{dZ}{dt} &= n_{\text{div}} \cdot \beta_x \cdot Y + \gamma(c_i) \cdot Z \quad i = [\text{IL2}, \text{MYC}, \text{C}]
+\end{align*}
+Where $\beta_x$ is the differentiation rate, $n_\text{div}$ is the number of divisions between state changes and $\gamma$ is the turnover rate of differentiated cells Z. The turnover rate $\gamma$ depends on the concentration $c_i$ of either IL2, MYC or C depending on the regulatory mechanism assumed in the different models.
+
+
+\begin{align*}
+\text{IL2} &= r_\text{IL2}\cdot \frac{Y}{Y+Z+K_\text{IL2}} \\
+C &= r_\text{C}\cdot \frac{1}{Z+K_C} \\
+\frac{d\text{MYC}}{dt} &= -r_\text{MYC} \cdot \text{MYC} \\
+\end{align*}
+
+One can assume two different ways how the regulators affect the turnover rate $\gamma$. First, one can assume that once a certain threshold $c_\text{crit}$ is reached at time $t_0$, the turnover rate $\gamma$ declines in an irreversible fashion:
+
+\begin{align*}
+\gamma &= \begin{cases}
+\widetilde{\gamma} & \text{if}\, c_i > c_\text{crit} \\
+\widetilde{\gamma} - \lambda (t-t_0)           & \text{otherwise}
+\end{cases}
+\end{align*}
+
+Alternatively, one could also assume a continuous modulation of the turnover rate by the regulators IL2, MYC and C. For this, I found it easiest to split $\gamma $ into separate death and proliferation rates:
+
+\begin{align*}
+\gamma_i &= \beta_p-d(c_i)\\
+d(c_i) &= \frac{\widetilde{d}}{K_i+c_i}
+\end{align*}
+
+Main difference between models in simulation: is gamma is varied: in mml model, system does not always go back to 0, especially for carrying capacity model where it always reached a stable steady state greater zero. it depends on the parameter range. there are also cases in threshold model but its rare.
+
+
+
+\begin{align*}
+\frac{d\text{MYC}}{dt} &= -r_\text{MYC}(\text{IL2}) \cdot \text{MYC} \\
+r_\text{MYC}(\text{IL2}) &= \frac{\widetilde{r}_\text{MYC}}{K_\text{IL2}+c_\text{IL2}}
+\end{align*}
+
+This is also what is observed by ... hodkin group
+
+\subsection*{parameter scan with higher y axis limits}
+\includegraphics[width = \textwidth]{pscans/scan_log_high.pdf}
+\end{document}

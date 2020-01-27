@@ -12,7 +12,7 @@ import numpy as np
 from scipy.integrate import odeint
 import pandas as pd
 from module_models import th_cell_diff, branch_precursor, branch_competetive
-from module_readouts import get_area, get_decay, get_peaktime, get_peak
+from module_readouts import get_area, get_decay, get_peaktime, get_peak, get_readouts
 from functools import partial
 import warnings
 # =============================================================================
@@ -21,11 +21,11 @@ import warnings
 def get_cells(state, d, model):
     
     if model == th_cell_diff:
-        tnaive = state[:, :-(2*d["alpha_p"])]
-        teff = state[:, -(2*d["alpha_p"]):]
         
-        tnaive = np.sum(tnaive, axis = 1)
+        teff = state[:, d["alpha"]:]
         teff = np.sum(teff, axis = 1)
+        tnaive = np.sum(state, axis = 1) - teff
+        
         cells = np.stack((tnaive, teff), axis = -1)
 
     if model == branch_competetive:
@@ -55,7 +55,7 @@ def get_cells(state, d, model):
 def init_model(d, model, initial_cells):
     
     if model == th_cell_diff:
-        y0 = np.zeros(d["alpha"]+2*d["alpha_p"])
+        y0 = np.zeros(d["alpha"]+1*d["alpha_p"])
     if model == branch_precursor:
         y0 = np.zeros(d["alpha1"]+d["alpha1_p"]+d["alpha2"]+d["alpha2_p"]+1)
     if model == branch_competetive:
@@ -67,8 +67,9 @@ def init_model(d, model, initial_cells):
 
 def run_model(time, d, model, initial_cells):
     d = dict(d)
-    y0 = init_model(d, model, initial_cells)
 
+    y0 = init_model(d, model, initial_cells)
+    
     state = odeint(model, y0, time, args = (d,)) 
     state = get_cells(state, d, model)
 
@@ -125,7 +126,10 @@ def sim_to_df(time, state, name, cell_names):
     
     return df
 
-def generate_readouts(df, time):
+def generate_readouts2(df, time):
+    """
+    deprecated
+    """
     groups = ["cond", "cell"] 
     
     get_peaktime_partial = partial(get_peaktime, time)
@@ -142,8 +146,14 @@ def generate_readouts(df, time):
     
     return df
 
+def generate_readouts(df):
+    groups = ["cond", "cell"] 
+    df = df.groupby(groups).apply(get_readouts)
+    
+    return df
+
 def vary_param(param_arr, param_name, time, cond, cond_names, norm, model = th_cell_diff,
-               convert = False, adjust_time = False):
+               convert = False, adjust_time = True):
     """
     vary parameter values get readouts for different conditions
     cond: list of parameter dictioniaries for each condition
@@ -154,7 +164,7 @@ def vary_param(param_arr, param_name, time, cond, cond_names, norm, model = th_c
     ! note that norm value needs to be in param_arr
     returns df with readouts for each cell and condition and parameter value
     """  
-    
+
     df_arr = [get_tidy_readouts(p, param_name, time, cond, cond_names, model = model,
                                 adjust_time = adjust_time) for p in param_arr]
     df = pd.concat(df_arr)
@@ -174,7 +184,9 @@ def vary_param(param_arr, param_name, time, cond, cond_names, norm, model = th_c
                    left_on = ["cond", "cell", "readout"], 
                    right_on = ["cond", "cell", "readout"])
     
-    df["ylog"] = np.log2(df["y"]/df["ynorm"])
+    logseries = df["y"]/df["ynorm"]
+    logseries = logseries.astype(float)
+    df["ylog"] = np.log2(logseries)
     # add xnorm column to normalise x axis for param scans
     df["xnorm"] = df["x"] / norm
     
@@ -216,7 +228,7 @@ def get_relative_readouts(df):
 
 def multi_param(param_arrays, param_names, time, cond, cond_names, norm_list, 
                 model = th_cell_diff, relative_readouts = False, convert = False,
-                adjust_time = False):
+                adjust_time = True):
     
     assert len(norm_list) == len(param_arrays) == len(param_names)
     df_arr =[vary_param(param_arr, 
@@ -249,7 +261,7 @@ def update_dicts(dicts, val, name):
     return dicts
 
 def norm_readout(pname, guess_range, time, cond, model = th_cell_diff,
-                 norm_cond = 4.):
+                 norm_cond = 100.):
     """
     guess range should be a tuple of pmin pmax, 
     cond is a dict with model params
@@ -270,39 +282,42 @@ def norm_readout(pname, guess_range, time, cond, model = th_cell_diff,
 
     df1 = run_exp(time, cond1, cond_names, model)
     df2 = run_exp(time, cond2, cond_names, model)
-    read1 = generate_readouts(df1, time)
-    read2 = generate_readouts(df2, time)
+    read1 = generate_readouts(df1)
+    read2 = generate_readouts(df2)
     area1 = read1.area[0]
     area2 = read2.area[0]
     #print(pname, cond, area1, area2)
-    assert area1 < norm_cond < area2
-    guess = (pmin+pmax) / 2
-    crit = False
-    counter = 0
-    while crit == False:
-        counter = counter + 1
-        if counter > 50:
-            print("stopping normalization")
-            break
-        cond[0][pname] = guess
-
-        df = run_exp(time, cond, cond_names, model)
-        read = generate_readouts(df, time)
-        area = read.area[0]
-        #print("guess...area...pmin...pmax")
-        #print(guess, area, pmin, pmax)
-        if area < norm_cond:
-            pmin = guess
-            guess = (guess+pmax)/2
-            
-        else:
-            pmax = guess
-            guess = (guess+pmin)/2
-                      
-        if np.abs(area-norm_cond) < 0.005:
-            crit = True
-            
-    return guess
+    if not(area1 < norm_cond < area2):
+        guess = np.nan
+        return guess
+    else:
+        guess = (pmin+pmax) / 2
+        crit = False
+        counter = 0
+        while crit == False:
+            counter = counter + 1
+            if counter > 50:
+                print("stopping normalization")
+                break
+            cond[0][pname] = guess
+    
+            df = run_exp(time, cond, cond_names, model)
+            read = generate_readouts(df)
+            area = read.area[0]
+            #print("guess...area...pmin...pmax")
+            #print(guess, area, pmin, pmax)
+            if area < norm_cond:
+                pmin = guess
+                guess = (guess+pmax)/2
+                
+            else:
+                pmax = guess
+                guess = (guess+pmin)/2
+                          
+            if np.abs(area-norm_cond) < 0.005:
+                crit = True
+                
+        return guess
 
 
 def get_tidy_readouts(p, param_name, time, cond, cond_names, model, adjust_time):
@@ -310,7 +325,7 @@ def get_tidy_readouts(p, param_name, time, cond, cond_names, model, adjust_time)
     cond = [update_dict(d, p, param_name) for d in cond]
     
     df = run_exp(time, cond, cond_names, model, adjust_time = adjust_time)
-    df2 = generate_readouts(df, time)
+    df2 = generate_readouts(df)
     df2 = pd.melt(df2.reset_index(), 
                   id_vars = ["cond", "cell"],
                   value_vars = ["area", "peak", "tau", "decay"], 

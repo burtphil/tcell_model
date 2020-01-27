@@ -15,52 +15,47 @@ def th_cell_diff(th_state, time, d):
     needs alpha and beta(r) of response time distribution, probability
     and number of precursor cells
     """
-    assert d["alpha_IL2"] < d["alpha"]
+    assert d["alpha_int"] < d["alpha"]
     
-    tnaive = np.sum(th_state[:-(2*d["alpha_p"])])
-    teff = np.sum(th_state[-(2*d["alpha_p"]):-d["alpha_p"]])
-    # this is the beta sad IL2 population
-    teff_noil2 = np.sum(th_state[-d["alpha_p"]:])
+    # divide array into cell states
+    tnaive = th_state[:d["alpha_int"]]
+    tint = th_state[d["alpha_int"]:d["alpha"]]
+    teff = th_state[d["alpha"]:]
     
-    # old IL2 model
-    # get IL2 producers (depending on alpha IL2)
+    assert len(tnaive)+len(tint)+len(teff) == len(th_state)
+    tnaive = np.sum(tnaive)
+    tint = np.sum(tint)
+    teff = np.sum(teff)
     
-    il2_producers = tnaive+teff
-    il2_consumers = teff+teff_noil2   
-    
-    if d["mode"] == "il2_old":
-        il2_producers = np.sum(th_state[:d["alpha_IL2"]])
-        il2_consumers = np.sum(th_state)-il2_producers
-
+    # IL2 production
+    il2_producers = tnaive+tint
+    il2_consumers = teff+tint   
     conc_il2 = d["rate_il2"]*il2_producers/(d["K_il2"]+il2_consumers)
     
+    # IL7 production
     il7_consumers = il2_consumers
     conc_il7 = d["rate_il7"] / (d["K_il2"]+il7_consumers)
-    # mm kinetic feedback implementation  
+    
+    # apply feedback on rate beta
     fb_ifn = 0
     if d["fb_ifn"] != 0:
         conc_ifn = d["rate_ifn"]*(il2_producers)
         fb_ifn = (d["fb_ifn"]*conc_ifn**3)/(conc_ifn**3+d["K_ifn"]**3)
   
-    beta = (fb_ifn+1)*d["beta"]
-    
-    beta_p = d["beta_p"] 
-    if d["mode"] != "Null":      
-        beta_p = beta_p * (1 - (il7_consumers / (d["crit_space"]) ) )
-        
+    beta = (fb_ifn+1)*d["beta"]  
+    beta_p = d["beta_p"]         
     rate_death = d["d_eff"]
 
-    # check if crit has been updated from F to T, if not
-    # check if crit should be updated, then store t0 time of update
-    # if crit has been updated, update prolif rate
+    # check homeostasis criteria
     if d["crit"] == False:
         update_t0(d, time, conc_il2, conc_il7)
     elif d["death_mode"] == False:
         beta_p = beta_p*np.exp(-d["decay_p"]*(time-d["t0"]))
     else:
-        rate_death = rate_death*np.exp(time-d["t0"])
-                
-    dt_state = diff_effector(th_state, teff, d, beta, rate_death, beta_p)
+        rate_death = rate_death*np.exp(0.1*(time-d["t0"]))
+    
+    # differentiation            
+    dt_state = diff_effector_new(th_state, teff, d, beta, rate_death, beta_p)
         
  
     return dt_state
@@ -112,11 +107,47 @@ def diff_effector(th_state, teff, d, beta, rate_death, beta_p):
         
     return dt_state
 
+def diff_effector_new(th_state, teff, d, beta, rate_death, beta_p):
+    dt_state = np.zeros_like(th_state)
+    #print(th_state.shape)
+    assert d["alpha"] != 1
+    
+    # calculate number of divisions for intermediate population
+    mu_div1 = d["alpha_int"] / d["beta"]
+    mu_div2 = (d["alpha"]-d["alpha_int"]) / d["beta"]
+    mu_prolif = d["alpha_p"] / d["beta_p"]
+    #n_div1 = (2*mu_div1)/mu_prolif
+    #n_div2 = (2*mu_div2)/mu_prolif
+    n_div1 = d["n_div"]
+    n_div2 = d["n_div"]
+    for j in range(len(th_state)):
+        #print(j)
+        if j == 0:
+            dt_state[j] = d["b"]-(beta+d["d_naive"])*th_state[j] 
+            
+        elif j < d["alpha_int"]:
+            dt_state[j] = beta*th_state[j-1]-(beta+d["d_naive"])*th_state[j]
+            
+        elif j == d["alpha_int"]:
+            dt_state[j] = n_div1*beta*th_state[j-1]-(beta+d["d_prec"])*th_state[j]
+
+        elif j < (d["alpha"]):
+            dt_state[j] = beta*th_state[j-1]-(beta+d["d_prec"])*th_state[j]
+        
+        elif j == (d["alpha"]):
+            dt_state[j] = n_div2*beta*th_state[j-1] + (2*beta_p*th_state[-1]) - (rate_death+beta_p)*th_state[j]       
+        
+        else:
+            dt_state[j] = beta_p*th_state[j-1]-(beta_p+rate_death)*th_state[j]
+        
+    return dt_state
+
 # =============================================================================
 # branching models
 # =============================================================================
 def diff_effector2(state, th0, alpha, beta, beta_p, p, d):
     """
+    this is for branched differentiation
     takes state vector to differentiate effector cells as linear chain
     needs alpha and beta(r) of response time distribution, probability
     and number of precursor cells
@@ -149,6 +180,7 @@ def diff_effector2(state, th0, alpha, beta, beta_p, p, d):
 
 def diff_precursor(state, th0, alpha, beta, beta_p, p_adj, rate_death, d):
     """
+    this is for branched differentiation
     takes state vector to differentiate effector cells as linear chain
     needs alpha and beta(r) of response time distribution, probability
     and number of precursor cells

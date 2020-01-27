@@ -1,10 +1,27 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from scipy import interpolate
+import pandas as pd
 
-def get_peaktime(time, series):
-    # only look at array where there are no nans
-    cells = series.array   
+def get_readouts(df):
+    
+    d = {}
+    time = df.time
+    cells = df.value
+    
+    d['peak'] = get_peak(time, cells)
+    d['tau'] = get_peaktime(time, cells)
+    d['area'] = get_area(time, cells)
+    d['decay'] = get_decay(time, cells)
+    series = pd.Series(d, index=['peak', 'tau', 'area', 'decay'])
+    
+    return series
+
+def get_peaktime(time, cells):
+
+    cells = cells.array
+
+    # only look at array where there are no nans    
     cellmax = np.amax(cells)
     cellmin = cells[-1]
     # check if cells are maximum in size at the end of simulation
@@ -37,11 +54,12 @@ def get_peaktime(time, series):
             
     return tau    
 
-def get_decay(time, series):
+def get_decay(time, cells):
     """
     get the half-time of decay
     """
-    cells = series.array  
+    
+    cells = cells.array
     cellmax = np.amax(cells)
     cellmin = cells[-1]
     # check if cells are maximum in size at the end of simulation
@@ -69,8 +87,9 @@ def get_decay(time, series):
     
     return tau
 
-def get_area(time, series):
-    cells = series.array 
+def get_area(time, cells):
+    
+    cells = cells.array 
     cellmax = np.amax(cells)
     cellmin = cells[-1]
     # check if cells are maximum in size at the end of simulation
@@ -85,8 +104,9 @@ def get_area(time, series):
         
     return area
 
-def get_peak(time, series):
-    cells = series.array 
+def get_peak(time, cells):
+    
+    cells = cells.array 
     cellmax = np.amax(cells)
     cellmin = cells[-1]
     # check if cells are maximum in size at the end of simulation
